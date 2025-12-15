@@ -1,0 +1,80 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Starlight, IAA/Magistrate Icons by Chim | CentComm and CentComm Operator Icon by Happyrobot33 and fqqf | MailTech Icon by Happyrobot33 | HeadRevolutionary and Revolutionary by JustAdler | NTCCBlueShield by conf | Syndicate Cargo, Chef, Warden, Science, Security, Engineer, Janitor Icons by IamSidzilla | SalvageLead,SalvageSpecialist icons by mikeysaurus",
+    "size": {
+        "x": 8,
+        "y": 8
+    },
+    "states": [
+        {
+            "name": "Magistrate"
+        },
+        {
+            "name": "IAA"
+        },
+        {
+            "name": "BlueShield"
+        },
+        {
+            "name": "Vampire"
+        },
+        {
+            "name": "Surgeon"
+        },
+        {
+            "name": "MailTech"
+         },
+        {
+            "name": "CentComm"
+        },
+        {
+            "name": "CentCommOperator"
+        },
+        {
+            "name": "Commander"
+        },
+        {
+            "name": "SyndicateAgent"
+        },
+        {
+            "name": "Operative"
+        },
+        {
+            "name": "SyndicateSecurity"
+        },
+        {
+            "name": "SyndicateWarden"
+        },
+        {
+            "name": "SyndicateScience"
+        },
+        {
+            "name": "SyndicateChef"
+        },
+        {
+            "name": "SyndicateEngineer"
+        },
+        {
+            "name": "SyndicateCargo"
+        },
+        {
+            "name": "SyndicateJanitor"
+        },
+        {
+            "name": "HeadRevolutionary"
+        },
+        {
+            "name": "Revolutionary"
+        },
+        {
+            "name": "NTNCBlueShield"
+        },
+        {
+            "name": "SalvageLead"
+        },
+        {
+            "name": "SalvageSpecialist"
+        }
+    ]
+}
