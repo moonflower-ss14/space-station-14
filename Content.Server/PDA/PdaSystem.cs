@@ -212,7 +212,9 @@ namespace Content.Server.PDA
                     IdOwner = id?.FullName,
                     JobTitle = id?.LocalizedJobTitle,
                     StationAlertLevel = pda.StationAlertLevel,
-                    StationAlertColor = pda.StationAlertColor
+                    StationAlertColor = pda.StationAlertColor,
+                    EvacShuttleStatus = pda.ShuttleStatus,
+                    EvacShuttleTime = pda.ShuttleTime
                 },
                 pda.StationName,
                 showUplink,
