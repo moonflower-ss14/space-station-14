@@ -1,0 +1,6 @@
+- type: guideEntry
+  id: MoonflowerRuleset
+  name: moonflower-rules
+  ruleEntry: true
+  priority: 0
+  text: "/ServerInfo/_Moonflower/Guidebook/ServerRules/MoonflowerRules.xml"
