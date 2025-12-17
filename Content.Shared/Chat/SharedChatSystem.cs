@@ -15,6 +15,12 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
 
+#region Moonflower
+using Content.Shared._Moonflower.Language;
+using Content.Shared._Moonflower.Language.Systems;
+using Robust.Shared.Serialization;
+#endregion Moonflower
+
 namespace Content.Shared.Chat;
 
 public abstract partial class SharedChatSystem : EntitySystem
@@ -39,6 +45,8 @@ public abstract partial class SharedChatSystem : EntitySystem
     public static readonly SoundSpecifier DefaultAnnouncementSound
         = new SoundPathSpecifier("/Audio/Announcements/announce.ogg");
 
+    public static readonly char[] ICDisallowedCharacters = ['[', ']', '\\']; // Starlight
+
     public static readonly ProtoId<RadioChannelPrototype> CommonChannel = "Common";
 
     public static readonly string DefaultChannelPrefix = $"{RadioChannelPrefix}{DefaultChannelKey}";
@@ -51,6 +59,11 @@ public abstract partial class SharedChatSystem : EntitySystem
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly INetManager _net = default!;
+
+    #region Starlight
+    [Dependency] private readonly SharedLanguageSystem _language = default!;
+    [Dependency] private readonly SpeechSystem _speechSystem = default!;
+    #endregion Starlight
 
     /// <summary>
     /// Cache of the keycodes for faster lookup.
@@ -318,6 +331,7 @@ public abstract partial class SharedChatSystem : EntitySystem
         string action,
         ChatTransmitRange range,
         string? nameOverride,
+        LanguagePrototype language, // Starlight-edit: Languages
         bool hideLog = false,
         bool checkEmote = true,
         bool ignoreActionBlocker = false,
@@ -373,8 +387,8 @@ public abstract partial class SharedChatSystem : EntitySystem
         ICommonSession? player = null,
         string? nameOverride = null,
         bool checkRadioPrefix = true,
-        bool ignoreActionBlocker = false
-        )
+        bool ignoreActionBlocker = false,
+        LanguagePrototype? languageOverride = null /* Starlight */)
     { }
 
     /// <summary>

@@ -18,4 +18,8 @@ public static class ChatChannelExtensions
             _ => Color.LightGray
         };
     }
+    // Starlight - With a spelling error corrected
+    public static bool IsExemptFromLanguages(this ChatChannel channel) =>
+    channel is ChatChannel.LOOC or ChatChannel.Emotes or ChatChannel.Notifications or ChatChannel.Visual;
 }
+

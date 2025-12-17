@@ -228,4 +228,12 @@ namespace Content.Server.GameTicking
             PlayerSession = playerSession;
         }
     }
+    // 🌟Starlight🌟
+    public sealed class PlayerConnectEvent : EntityEventArgs
+    {
+        public readonly ICommonSession PlayerSession;
+
+        public PlayerConnectEvent(ICommonSession playerSession)
+            => PlayerSession = playerSession;
+    }
 }

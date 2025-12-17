@@ -1,1 +1,0 @@
-NanoTrasenRepresentative-loadout = NanoTrasen representative's loadout

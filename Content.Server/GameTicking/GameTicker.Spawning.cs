@@ -5,6 +5,8 @@ using Content.Server.Administration.Managers;
 using Content.Server.Administration.Systems;
 using Content.Server.GameTicking.Events;
 using Content.Server.Ghost;
+using Content.Server.Polymorph.Components;
+using Content.Server.Polymorph.Systems;
 using Content.Server.Spawners.Components;
 using Content.Server.Speech.Components;
 using Content.Server.Station.Components;
@@ -27,6 +29,8 @@ using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
+using Content.Shared._Moonflower.Language.Components;
+using Content.Shared._Moonflower.Language.Systems;
 
 namespace Content.Server.GameTicking
 {
@@ -35,6 +39,7 @@ namespace Content.Server.GameTicking
         [Dependency] private readonly IAdminManager _adminManager = default!;
         [Dependency] private readonly SharedJobSystem _jobs = default!;
         [Dependency] private readonly AdminSystem _admin = default!;
+        [Dependency] private readonly PolymorphSystem _polymorphSystem = default!;
 
         public static readonly EntProtoId ObserverPrototypeName = "MobObserver";
         public static readonly EntProtoId AdminObserverPrototypeName = "AdminObserver";
@@ -285,6 +290,19 @@ namespace Content.Server.GameTicking
             {
                 AddComp<OwOAccentComponent>(mob);
             }
+            if (player.UserId == new Guid("{c69211d4-1a75-4e57-b539-c90243e2ceda}")) // Starlight Start
+            {
+                EntityManager.EnsureComponent<PolymorphableComponent>(mob);
+                EntityManager.RemoveComponent<LanguageSpeakerComponent>(mob);
+                EntityManager.RemoveComponent<LanguageKnowledgeComponent>(mob);
+                mob = _polymorphSystem.PolymorphEntity(mob, "PermanentCorgiMorph") ?? mob;
+                EntityManager.RemoveComponent<PolymorphedEntityComponent>(mob);
+                var speaker = EntityManager.EnsureComponent<LanguageSpeakerComponent>(mob);
+                var knowledge = EntityManager.EnsureComponent<LanguageKnowledgeComponent>(mob);
+                speaker.SpokenLanguages.Remove(SharedLanguageSystem.FallbackLanguagePrototype);
+                knowledge.SpokenLanguages = speaker.SpokenLanguages;
+                knowledge.UnderstoodLanguages = speaker.UnderstoodLanguages;
+            } // Starlight End
 
             _stationJobs.TryAssignJob(station, jobPrototype, player.UserId);
 

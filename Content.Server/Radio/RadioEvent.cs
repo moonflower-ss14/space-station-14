@@ -1,10 +1,24 @@
 using Content.Shared.Chat;
 using Content.Shared.Radio;
+using Content.Shared._Moonflower.Language; // Moonflower
 
 namespace Content.Server.Radio;
 
+/// <summary>
+/// <param name="OriginalChatMsg">The message to display when the speaker can understand "language"</param>
+/// <param name="LanguageObfuscatedChatMsg">The message to display when the Speaker cannot understand "language"</param>
+/// </summary>
 [ByRefEvent]
-public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg);
+public readonly record struct RadioReceiveEvent(
+    string Message,
+    EntityUid MessageSource,
+    RadioChannelPrototype Channel,
+    ChatMessage OriginalChatMsg,
+    ChatMessage LanguageObfuscatedChatMsg,
+    LanguagePrototype Language,
+    EntityUid RadioSource,
+    List<EntityUid> Receivers
+    ); // Starlight
 
 /// <summary>
 /// Event raised on the parent entity of a headset radio when a radio message is received

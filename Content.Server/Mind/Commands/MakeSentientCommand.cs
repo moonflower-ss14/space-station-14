@@ -1,6 +1,9 @@
 using Content.Server.Administration;
 using Content.Shared.Administration;
 using Robust.Shared.Console;
+using Content.Server._Moonflower.Language; // Starlight
+using Content.Shared._Moonflower.Language.Components; // Starlight
+using Content.Shared._Moonflower.Language.Systems; // Starlight
 
 namespace Content.Server.Mind.Commands;
 

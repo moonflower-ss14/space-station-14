@@ -1,0 +1,12 @@
+- type: trait
+  id: Nekomimetic
+  name: trait-language-nekomimetic-name
+  description: trait-language-nekomimetic-desc
+  category: LanguageTraits
+  cost: 2
+  components:
+  - type: LanguageSpeaker
+  languagesSpoken:
+    - Nekomimetic
+  languagesUnderstood:
+    - Nekomimetic

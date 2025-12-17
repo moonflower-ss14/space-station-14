@@ -3,6 +3,15 @@ using Content.Server.Speech.Components;
 using Content.Shared.EntityEffects;
 using Content.Shared.EntityEffects.Effects;
 using Content.Shared.Mind.Components;
+#region Starlight
+using Content.Shared._Moonflower.Language.Components;
+using Content.Shared._Moonflower.Language.Events;
+using Content.Shared._Moonflower.Language;
+using Content.Shared._Moonflower.Language.Systems;
+using Content.Server._Moonflower.Language;
+using Content.Shared.Chat;
+#endregion Starlight
+
 
 namespace Content.Server.EntityEffects.Effects;
 
@@ -23,6 +32,21 @@ public sealed partial class MakeSentientEntityEffectSystem : EntityEffectSystem<
             RemComp<ReplacementAccentComponent>(entity);
             // TODO: Make MonkeyAccent a replacement accent and remove MonkeyAccent code-smell.
             RemComp<MonkeyAccentComponent>(entity);
+
+            // Starlight - Sart
+            // Make sure the entity knows at least fallback.
+            var speaker = EnsureComp<LanguageSpeakerComponent>(entity);
+            var knowledge = EnsureComp<LanguageKnowledgeComponent>(entity);
+            var fallback = SharedLanguageSystem.FallbackLanguagePrototype;
+
+            if (!knowledge.UnderstoodLanguages.Contains(fallback))
+                knowledge.UnderstoodLanguages.Add(fallback);
+
+            if (!knowledge.SpokenLanguages.Contains(fallback))
+                knowledge.SpokenLanguages.Add(fallback);
+
+            IoCManager.Resolve<IEntitySystemManager>().GetEntitySystem<LanguageSystem>().UpdateEntityLanguages((entity, speaker));
+            // Starlight - End
         }
 
         // Stops from adding a ghost role to things like people who already have a mind

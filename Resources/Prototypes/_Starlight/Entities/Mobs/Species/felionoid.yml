@@ -3,13 +3,13 @@
   id: BaseMobFelionoid
   abstract: true
   components:
-#  - type: LanguageKnowledge
-#    speaks:
-#     - GalacticCommon
-#     - Nekomimetic
-#     understands:
-#     - GalacticCommon
-#     - Nekomimetic
+  - type: LanguageKnowledge
+    speaks:
+     - GalacticCommon
+     - Nekomimetic
+    understands:
+     - GalacticCommon
+     - Nekomimetic
 #     - Cat
 #  - type: Absorbable
 #  - type: Speech
