@@ -13,13 +13,13 @@ namespace Content.Shared.GameTicking;
 public sealed class PlayerBeforeSpawnEvent : HandledEntityEventArgs
 {
     public ICommonSession Player { get; }
-    public HumanoidCharacterProfile? Profile { get; }
+    public HumanoidCharacterProfile? Profile { get; } // starlight edit
     public string? JobId { get; }
     public bool LateJoin { get; }
     public EntityUid Station { get; }
 
     public PlayerBeforeSpawnEvent(ICommonSession player,
-        HumanoidCharacterProfile? profile,
+        HumanoidCharacterProfile? profile, // starlight edit
         string? jobId,
         bool lateJoin,
         EntityUid station)

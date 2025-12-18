@@ -4,6 +4,7 @@ using Content.Server.GameTicking.Rules.Components;
 using Content.Server.KillTracking;
 using Content.Server.Mind;
 using Content.Server.Points;
+using Content.Server.Preferences.Managers; // starlight
 using Content.Server.RoundEnd;
 using Content.Server.Station.Systems;
 using Content.Shared.GameTicking;
@@ -29,6 +30,7 @@ public sealed class DeathMatchRuleSystem : GameRuleSystem<DeathMatchRuleComponen
     [Dependency] private readonly RoundEndSystem _roundEnd = default!;
     [Dependency] private readonly StationSpawningSystem _stationSpawning = default!;
     [Dependency] private readonly TransformSystem _transform = default!;
+    [Dependency] private readonly IServerPreferencesManager _preferences = default!; // starlight
 
     public override void Initialize()
     {
@@ -48,10 +50,16 @@ public sealed class DeathMatchRuleSystem : GameRuleSystem<DeathMatchRuleComponen
             if (!GameTicker.IsGameRuleActive(uid, rule))
                 continue;
 
-            var newMind = _mind.CreateMind(ev.Player.UserId, ev.Profile.Name);
+            // starlight edit start
+            // If no profile is provided here, try to get any enabled profile for the player...
+            var profile = ev.Profile ?? _preferences?.GetPreferences(ev.Player.UserId).GetRandomEnabledProfile();
+            if (profile == null)
+                return;
+            // starlight edit end
+            var newMind = _mind.CreateMind(ev.Player.UserId, profile.Name); // starlight edit
             _mind.SetUserId(newMind, ev.Player.UserId);
 
-            var mobMaybe = _stationSpawning.SpawnPlayerCharacterOnStation(ev.Station, null, ev.Profile);
+            var mobMaybe = _stationSpawning.SpawnPlayerCharacterOnStation(ev.Station, null, profile); // starlight edit
             DebugTools.AssertNotNull(mobMaybe);
             var mob = mobMaybe!.Value;
 
