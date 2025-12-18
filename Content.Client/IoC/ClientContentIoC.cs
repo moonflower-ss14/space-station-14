@@ -1,3 +1,4 @@
+using Content.Client._Starlight.Managers; // starlight
 using Content.Client.Administration.Managers;
 using Content.Client.Changelog;
 using Content.Client.Chat.Managers;
@@ -45,6 +46,7 @@ namespace Content.Client.IoC
             collection.Register<IClickMapManager, ClickMapManager>();
             collection.Register<IClientAdminManager, ClientAdminManager>();
             collection.Register<ISharedAdminManager, ClientAdminManager>();
+            collection.Register<IClientPlayerRolesManager, ClientPlayerManager>();  // 🌟Starlight🌟
             collection.Register<EuiManager, EuiManager>();
             collection.Register<IVoteManager, VoteManager>();
             collection.Register<ChangelogManager, ChangelogManager>();
