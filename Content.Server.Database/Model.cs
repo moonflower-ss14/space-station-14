@@ -82,8 +82,8 @@ namespace Content.Server.Database
                 entity.HasIndex(e => e.ProfileId)
                     .IsUnique();
 
-                entity.Property(e => e.CustomSpecieName)
-                    .HasMaxLength(32);
+                // entity.Property(e => e.CustomSpecieName)
+                //     .HasMaxLength(32);
             });
             // Starlight - End
 

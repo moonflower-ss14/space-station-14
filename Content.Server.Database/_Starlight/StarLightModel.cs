@@ -41,8 +41,8 @@ public sealed class StarLightModel : DataModelBase
             entity.HasIndex(e => e.ProfileId)
                 .IsUnique();
 
-            entity.Property(e => e.CustomSpecieName)
-                .HasMaxLength(32);
+            // entity.Property(e => e.CustomSpecieName)
+            //     .HasMaxLength(32);
         });
 
         modelBuilder.Entity<CharacterInfo>(entity =>
@@ -59,10 +59,10 @@ public sealed class StarLightModel : DataModelBase
         public int Id { get; set; }
         public int ProfileId { get; set; }
         public virtual Profile Profile { get; set; } = null!;
-        public string? CustomSpecieName { get; set; }
-        public List<string> CyberneticIds { get; set; } = [];
-        public float Width { get; set; } = 1f;
-        public float Height { get; set; } = 1f;
+        // public string? CustomSpecieName { get; set; }
+        // public List<string> CyberneticIds { get; set; } = [];
+        // public float Width { get; set; } = 1f;
+        // public float Height { get; set; } = 1f;
     }
 
     public class PlayerDataDTO
@@ -81,22 +81,22 @@ public sealed class StarLightModel : DataModelBase
 
         public virtual Profile Profile { get; set; } = null!;
 
-        [MaxLength(4096)]
-        public string PhysicalDesc { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string PhysicalDesc { get; set; } = string.Empty;
 
-        [MaxLength(4096)]
-        public string PersonalityDesc { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string PersonalityDesc { get; set; } = string.Empty;
 
-        [MaxLength(4096)]
-        public string PersonalNotes { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string PersonalNotes { get; set; } = string.Empty;
 
-        [MaxLength(4096)]
-        public string CharacterSecrets { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string CharacterSecrets { get; set; } = string.Empty;
 
-        [MaxLength(4096)]
-        public string ExploitableInfo { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string ExploitableInfo { get; set; } = string.Empty;
 
-        [MaxLength(4096)]
-        public string OOCNotes { get; set; } = string.Empty;
+        // [MaxLength(4096)]
+        // public string OOCNotes { get; set; } = string.Empty;
     }
 }

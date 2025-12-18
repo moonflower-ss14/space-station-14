@@ -1381,42 +1381,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("integer")
                         .HasColumnName("profile_id");
 
-                    b.Property<string>("CharacterSecrets")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("character_secrets");
-
-                    b.Property<string>("ExploitableInfo")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("exploitable_info");
-
-                    b.Property<string>("OOCNotes")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("oocnotes");
-
-                    b.Property<string>("PersonalNotes")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("personal_notes");
-
-                    b.Property<string>("PersonalityDesc")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("personality_desc");
-
-                    b.Property<string>("PhysicalDesc")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("physical_desc");
-
                     b.HasKey("ProfileId")
                         .HasName("PK_sl_character_info");
 
@@ -1457,27 +1421,9 @@ namespace Content.Server.Database.Migrations.Postgres
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CustomSpecieName")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("custom_specie_name");
-
-                    b.PrimitiveCollection<List<string>>("CyberneticIds")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("cybernetic_ids");
-
-                    b.Property<float>("Height")
-                        .HasColumnType("real")
-                        .HasColumnName("height");
-
                     b.Property<int>("ProfileId")
                         .HasColumnType("integer")
                         .HasColumnName("profile_id");
-
-                    b.Property<float>("Width")
-                        .HasColumnType("real")
-                        .HasColumnName("width");
 
                     b.HasKey("Id")
                         .HasName("PK_star_light_profile");

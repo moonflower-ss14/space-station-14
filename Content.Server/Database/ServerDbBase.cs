@@ -301,33 +301,33 @@ namespace Content.Server.Database
             }
 
             //start starlight
-            string physicalDesc = string.Empty;
-            string personalityDesc = string.Empty;
-            string personalNotes = string.Empty;
-            string oocNotes = string.Empty;
-            string characterSecrets = string.Empty;
-            string exploitableInfo = string.Empty;
+            // string physicalDesc = string.Empty;
+            // string personalityDesc = string.Empty;
+            // string personalNotes = string.Empty;
+            // string oocNotes = string.Empty;
+            // string characterSecrets = string.Empty;
+            // string exploitableInfo = string.Empty;
 
-            if (profile.CharacterInfo != null)
-            {
-                physicalDesc = profile.CharacterInfo.PhysicalDesc;
-                if (string.IsNullOrEmpty(physicalDesc))
-                {
-                    physicalDesc = profile.FlavorText;
-                }
-                personalityDesc = profile.CharacterInfo.PersonalityDesc;
-                personalNotes = profile.CharacterInfo.PersonalNotes;
-                oocNotes = profile.CharacterInfo.OOCNotes;
-                characterSecrets = profile.CharacterInfo.CharacterSecrets;
-                exploitableInfo = profile.CharacterInfo.ExploitableInfo;
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(physicalDesc))
-                {
-                    physicalDesc = profile.FlavorText;
-                }
-            }
+            // if (profile.CharacterInfo != null)
+            // {
+            //     physicalDesc = profile.CharacterInfo.PhysicalDesc;
+            //     if (string.IsNullOrEmpty(physicalDesc))
+            //     {
+            //         physicalDesc = profile.FlavorText;
+            //     }
+            //     personalityDesc = profile.CharacterInfo.PersonalityDesc;
+            //     personalNotes = profile.CharacterInfo.PersonalNotes;
+            //     oocNotes = profile.CharacterInfo.OOCNotes;
+            //     characterSecrets = profile.CharacterInfo.CharacterSecrets;
+            //     exploitableInfo = profile.CharacterInfo.ExploitableInfo;
+            // }
+            // else
+            // {
+            //     if (string.IsNullOrEmpty(physicalDesc))
+            //     {
+            //         physicalDesc = profile.FlavorText;
+            //     }
+            // }
             //end starlight
             // Cosmatic Drift Record System-start: Build a humanoid profile so CD record data can be attached before returning
             var humanoid = new HumanoidCharacterProfile(
