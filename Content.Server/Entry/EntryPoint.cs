@@ -32,6 +32,7 @@ using Robust.Shared.ContentPack;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
+using Content.Server._Starlight;
 
 namespace Content.Server.Entry
 {
@@ -76,6 +77,10 @@ namespace Content.Server.Entry
         [Dependency] private readonly ServerApi _serverApi = default!;
         [Dependency] private readonly ServerInfoManager _serverInfo = default!;
         [Dependency] private readonly ServerUpdateManager _updateManager = default!;
+
+        #region Starlight
+        [Dependency] private readonly IPlayerRolesManager _playerRoles = default!;
+        #endregion Starlight
 
         public override void PreInit()
         {
@@ -154,6 +159,7 @@ namespace Content.Server.Entry
 
             _recipe.Initialize();
             _admin.Initialize();
+            _playerRoles.Initialize(); // Starlight
             _afk.Initialize();
             _rules.Initialize();
             _discordLink.Initialize();

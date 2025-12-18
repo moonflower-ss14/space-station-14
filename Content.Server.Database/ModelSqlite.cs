@@ -72,19 +72,18 @@ namespace Content.Server.Database
             var jsonStringConverter = new ValueConverter<JsonDocument, string>(
                 v => JsonDocumentToString(v),
                 v => StringToJsonDocument(v));
+            var jsonByteArrayConverter = new ValueConverter<JsonDocument?, byte[]?>(
+                v => JsonDocumentToByteArray(v),
+                v => ByteArrayToJsonDocument(v));
 
+            modelBuilder.Entity<AdminLog>()
+                .Property(log => log.Json)
+                .HasConversion(jsonStringConverter);
+
+            modelBuilder.Entity<Profile>()
+                .Property(log => log.Markings)
+                .HasConversion(jsonByteArrayConverter);
             // Cosmatic Drift Record System-start: Reuse JSON-to-byte[] conversion so CD records persist correctly on SQLite
-            // var jsonByteArrayConverter = new ValueConverter<JsonDocument?, byte[]?>(
-            //     v => JsonDocumentToByteArray(v),
-            //     v => ByteArrayToJsonDocument(v));
-
-            // modelBuilder.Entity<AdminLog>()
-            //     .Property(log => log.Json)
-            //     .HasConversion(jsonStringConverter);
-
-            // modelBuilder.Entity<Profile>()
-            //     .Property(log => log.Markings)
-            //     .HasConversion(jsonByteArrayConverter);
             // modelBuilder.Entity<CDModel.CDProfile>()
             //     .Property(profile => profile.CharacterRecords)
             //     .HasConversion(jsonByteArrayConverter);

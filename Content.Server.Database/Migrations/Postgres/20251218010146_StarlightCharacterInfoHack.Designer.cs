@@ -6,6 +6,7 @@ using System.Text.Json;
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -15,9 +16,11 @@ using NpgsqlTypes;
 namespace Content.Server.Database.Migrations.Postgres
 {
     [DbContext(typeof(PostgresServerDbContext))]
-    partial class PostgresServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251218010146_StarlightCharacterInfoHack")]
+    partial class StarlightCharacterInfoHack
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -871,10 +874,18 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("text")
                         .HasColumnName("eye_color");
 
+                    b.Property<bool>("EyeGlowing")
+                        .HasColumnType("boolean")
+                        .HasColumnName("eye_glowing");
+
                     b.Property<string>("FacialHairColor")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("facial_hair_color");
+
+                    b.Property<bool>("FacialHairGlowing")
+                        .HasColumnType("boolean")
+                        .HasColumnName("facial_hair_glowing");
 
                     b.Property<string>("FacialHairName")
                         .IsRequired()
@@ -896,6 +907,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("text")
                         .HasColumnName("hair_color");
 
+                    b.Property<bool>("HairGlowing")
+                        .HasColumnType("boolean")
+                        .HasColumnName("hair_glowing");
+
                     b.Property<string>("HairName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -914,6 +929,11 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("text")
                         .HasColumnName("sex");
 
+                    b.Property<string>("SiliconVoice")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("silicon_voice");
+
                     b.Property<string>("SkinColor")
                         .IsRequired()
                         .HasColumnType("text")
@@ -931,6 +951,11 @@ namespace Content.Server.Database.Migrations.Postgres
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("species");
+
+                    b.Property<string>("Voice")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("voice");
 
                     b.HasKey("Id")
                         .HasName("PK_profile");

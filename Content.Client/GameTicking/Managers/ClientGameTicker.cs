@@ -2,6 +2,7 @@ using Content.Client.Administration.Managers;
 using Content.Client.Gameplay;
 using Content.Client.Lobby;
 using Content.Client.RoundEnd;
+// using Content.Shared.Starlight.NewLife;
 using Content.Shared.GameTicking;
 using Content.Shared.GameWindow;
 using Content.Shared.Roles;
@@ -69,6 +70,8 @@ namespace Content.Client.GameTicking.Managers
             _admin.AdminStatusUpdated -= OnAdminUpdated;
             base.Shutdown();
         }
+        // public void NewLifeOpened() //🌟Starlight🌟
+        //     => RaiseNetworkEvent(new NewLifeOpenedEvent());
 
         private void OnAdminUpdated()
         {

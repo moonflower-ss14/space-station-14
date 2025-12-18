@@ -332,7 +332,8 @@ namespace Content.Server.Database
             // Cosmatic Drift Record System-start: Build a humanoid profile so CD record data can be attached before returning
             var humanoid = new HumanoidCharacterProfile(
                 profile.CharacterName,
-                profile.Voice,
+                profile.FlavorText,
+                // profile.Voice,
                 // profile.SiliconVoice, // 🌟Starlight🌟
                 // physicalDesc, // Starlight
                 // personalityDesc, // Starlight

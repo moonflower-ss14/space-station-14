@@ -11,11 +11,11 @@ namespace Content.Server.Database;
 
 public partial class Profile
 {
-    public string Voice { get; set; } = null!;
-    public string SiliconVoice { get; set; } = null!;
-    public bool HairGlowing { get; set; } = false;
-    public bool FacialHairGlowing { get; set; } = false;
-    public bool EyeGlowing { get; set; } = false;
+    // public string Voice { get; set; } = null!;
+    // public string SiliconVoice { get; set; } = null!;
+    // public bool HairGlowing { get; set; } = false;
+    // public bool FacialHairGlowing { get; set; } = false;
+    // public bool EyeGlowing { get; set; } = false;
     public bool Enabled { get; set; }
 
     public StarLightModel.CharacterInfo? CharacterInfo { get; set; }
