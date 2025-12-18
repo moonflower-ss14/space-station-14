@@ -13,6 +13,12 @@ using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
+#region Starlight
+using Content.Client._Starlight.Managers;
+using Content.Client.Lobby;
+using Content.Shared._Starlight;
+#endregion Starlight
+
 namespace Content.Client.Players.PlayTimeTracking;
 
 public sealed class JobRequirementsManager : ISharedPlaytimeManager
@@ -147,9 +153,13 @@ public sealed class JobRequirementsManager : ISharedPlaytimeManager
         if (!CheckWhitelist(job, out reason))
             return false;
 
+        var player = _playerManager.LocalSession;
+        if (player == null)
+            return true;
+
         // Check other role requirements
         var reqs = _entManager.System<SharedRoleSystem>().GetRoleRequirements(job);
-        if (!CheckRoleRequirements(reqs, profile, out reason))
+        if (!CheckRoleRequirements(reqs, player, profile, out reason))
             return false;
 
         return true;
@@ -174,16 +184,28 @@ public sealed class JobRequirementsManager : ISharedPlaytimeManager
         if (!CheckWhitelist(antag, out reason))
             return false;
 
+        var player = _playerManager.LocalSession;
+        if (player == null)
+            return true;
+
         // Check other role requirements
         var reqs = _entManager.System<SharedRoleSystem>().GetRoleRequirements(antag);
-        if (!CheckRoleRequirements(reqs, profile, out reason))
+        if (!CheckRoleRequirements(reqs, player, profile, out reason))
             return false;
 
         return true;
     }
 
+    /// <summary>
+    /// SL: Check against a requirements list without a role. Avoid using if there's a role, as this doesn't check bans.
+    /// </summary>
+    public bool CheckRequirementsForNonRole(HashSet<JobRequirement>? requirements, ICommonSession? player, HumanoidCharacterProfile? profile, [NotNullWhen(false)] out FormattedMessage? reason)
+    {
+        return CheckRoleRequirements(requirements, player, profile, out reason);
+    }
+
     // This must be private so code paths can't accidentally skip requirement overrides. Call this through IsAllowed()
-    private bool CheckRoleRequirements(HashSet<JobRequirement>? requirements, HumanoidCharacterProfile? profile, [NotNullWhen(false)] out FormattedMessage? reason)
+    private bool CheckRoleRequirements(HashSet<JobRequirement>? requirements, ICommonSession? player, HumanoidCharacterProfile? profile, [NotNullWhen(false)] out FormattedMessage? reason)
     {
         reason = null;
 
@@ -193,7 +215,7 @@ public sealed class JobRequirementsManager : ISharedPlaytimeManager
         var reasons = new List<string>();
         foreach (var requirement in requirements)
         {
-            if (requirement.Check(_entManager, _prototypes, profile, _roles, out var jobReason))
+            if (requirement.Check(_entManager, player, _prototypes, profile, _roles, out var jobReason))
                 continue;
 
             reasons.Add(jobReason.ToMarkup());
@@ -232,7 +254,8 @@ public sealed class JobRequirementsManager : ISharedPlaytimeManager
         return _roles.TryGetValue("Overall", out var overallPlaytime) ? overallPlaytime : TimeSpan.Zero;
     }
 
-    public IEnumerable<KeyValuePair<string, TimeSpan>> FetchPlaytimeByRoles()
+    //starlight edit, string changed to JobPrototype
+    public IEnumerable<KeyValuePair<JobPrototype, TimeSpan>> FetchPlaytimeByRoles()
     {
         var jobsToMap = _prototypes.EnumeratePrototypes<JobPrototype>();
 
@@ -240,10 +263,41 @@ public sealed class JobRequirementsManager : ISharedPlaytimeManager
         {
             if (_roles.TryGetValue(job.PlayTimeTracker, out var locJobName))
             {
-                yield return new KeyValuePair<string, TimeSpan>(job.Name, locJobName);
+                yield return new KeyValuePair<JobPrototype, TimeSpan>(job, locJobName);
             }
         }
     }
+
+    //Starlight
+    public IEnumerable<KeyValuePair<DepartmentPrototype, TimeSpan>> FetchPlaytimeByDepartments()
+    {
+        var departmentsToMap = _prototypes.EnumeratePrototypes<DepartmentPrototype>();
+
+        foreach (var department in departmentsToMap)
+        {
+            //bulk up time
+            var departmentTime = TimeSpan.Zero;
+
+            foreach (var job in department.Roles)
+            {
+                //get it as the actual type
+                if (!_prototypes.TryIndex(job, out JobPrototype? jobProto))
+                    continue;
+
+                if (_roles.TryGetValue(jobProto.PlayTimeTracker, out var time))
+                {
+                    departmentTime += time;
+                }
+            }
+
+            //if the timer is 0, skip
+            if (departmentTime == TimeSpan.Zero)
+                continue;
+
+            yield return new KeyValuePair<DepartmentPrototype, TimeSpan>(department, departmentTime);
+        }
+    }
+    //starlight end
 
     public IReadOnlyDictionary<string, TimeSpan> GetPlayTimes(ICommonSession session)
     {

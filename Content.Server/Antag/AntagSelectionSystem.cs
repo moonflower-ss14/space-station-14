@@ -1,7 +1,10 @@
 using System.Linq;
 using Content.Server.Administration.Managers;
 using Content.Server.Antag.Components;
+using Content.Server.Body.Systems;
+using Content.Server.Body.Components;
 using Content.Server.Chat.Managers;
+using Content.Server.GameTicking.Rules.Components;
 using Content.Server.GameTicking;
 using Content.Server.GameTicking.Events;
 using Content.Server.GameTicking.Rules;
@@ -16,6 +19,8 @@ using Content.Server.Roles.Jobs;
 using Content.Server.Shuttles.Components;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Antag;
+using Content.Server.Bible.Components;
+using Content.Shared.Body.Components;
 using Content.Shared.Clothing;
 using Content.Shared.Database;
 using Content.Shared.GameTicking;
@@ -51,9 +56,11 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
     [Dependency] private readonly PlayTimeTrackingSystem _playTime = default!;
     [Dependency] private readonly IServerPreferencesManager _pref = default!;
     [Dependency] private readonly RoleSystem _role = default!;
-    [Dependency] private readonly TransformSystem _transform = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
+    [Dependency] private readonly BodySystem _body = default!;
     [Dependency] private readonly ISharedAdminLogManager _adminLogger = default!;
+    [Dependency] private readonly SharedHumanoidAppearanceSystem _appearance = default!;
 
     // arbitrary random number to give late joining some mild interest.
     public const float LateJoinRandomChance = 0.5f;
@@ -302,6 +309,17 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
                     Log.Warning($"Somehow picked {session} for an antag when this rule already selected them previously");
                     continue;
                 }
+
+                // if (session != null && HasComp<VampireRuleComponent>(ent))
+                // {
+                //     var playerEntity = session.AttachedEntity;
+
+                //     if (playerEntity == null
+                //         || HasComp<BibleUserComponent>(playerEntity)
+                //         || !TryComp<BodyComponent>(playerEntity, out var body)
+                //         || !_body.TryGetBodyOrganEntityComps<StomachComponent>((playerEntity.Value, body), out var stomachs))
+                //         continue;
+                // }
             }
 
             if (session == null)
@@ -347,14 +365,23 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
     {
         _adminLogger.Add(LogType.AntagSelection, $"Start trying to make {session} become the antagonist: {ToPrettyString(ent)}");
 
+        /* Starlight start - disable upstream antag check logic
         if (checkPref && !ValidAntagPreference(session, def.PrefRoles))
             return false;
+        */// Starlight end of disable
 
         if (!IsSessionValid(ent, session, def) || !IsEntityValid(session?.AttachedEntity, def))
             return false;
 
         if (onlyPreSelect && session != null)
         {
+            // This is preselection, so check if the PLAYER AS A WHOLE is compatible with the antagonist
+            if (checkPref && !HasPrimaryAntagPreference(session, def, ent.Comp.SelectionTime))
+            {
+                _adminLogger.Add(LogType.AntagSelection, $"{session} didn't have antagonist preference for {ToPrettyString(ent)}");
+                return false;
+            }
+
             if (!ent.Comp.PreSelectedSessions.TryGetValue(def, out var set))
                 ent.Comp.PreSelectedSessions.Add(def, set = new HashSet<ICommonSession>());
             set.Add(session);
@@ -363,6 +390,14 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
         }
         else
         {
+            // This is not preselection, so check the player's actual entity to see if it's compatible with the antagonist.
+            // This function will also check the character profile's antagonist preferences.
+            if (!IsEntityValid(session?.AttachedEntity, def))
+            {
+                _adminLogger.Add(LogType.AntagSelection, $"{session} didn't have valid entity for {ToPrettyString(ent)}");
+                return false;
+            }
+
             MakeAntag(ent, session, def, ignoreSpawner);
         }
 
@@ -502,11 +537,11 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
                 continue;
 
             // Add player to the appropriate antag pool
-            if (ValidAntagPreference(session, def.PrefRoles))
+            if (ValidAntagPreference(session, def.PrefRoles, ent.Comp.SelectionTime))
             {
                 preferredList.Add(session);
             }
-            else if (ValidAntagPreference(session, def.FallbackRoles))
+            else if (ValidAntagPreference(session, def.FallbackRoles, ent.Comp.SelectionTime))
             {
                 fallbackList.Add(session);
             }
@@ -577,6 +612,15 @@ public sealed partial class AntagSelectionSystem : GameRuleSystem<AntagSelection
 
         if (!def.AllowNonHumans && !HasComp<HumanoidAppearanceComponent>(entity))
             return false;
+
+        // Ensure that the profile has the antag preference set, if this is a late join this hasn't been checked!
+        var baseProfile = _appearance.GetBaseProfile(entity.Value);
+        if (baseProfile is not null)
+        {
+            if (!def.PrefRoles.ToHashSet().Overlaps(baseProfile.AntagPreferences) &&
+                !def.FallbackRoles.ToHashSet().Overlaps(baseProfile.AntagPreferences))
+                return false;
+        }
 
         if (def.Whitelist != null)
         {

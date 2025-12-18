@@ -27,11 +27,17 @@ public sealed class AntagLoadProfileRuleSystem : GameRuleSystem<AntagLoadProfile
         if (args.Handled)
             return;
 
-        var profile = args.Session != null
-            ? _prefs.GetPreferences(args.Session.UserId).SelectedCharacter as HumanoidCharacterProfile
-            : HumanoidCharacterProfile.RandomWithSpecies();
+        // Try to find a profile with this antagonist enabled on the player preferences
+        HumanoidCharacterProfile? profile = null;
+        if (args.Session != null)
+        {
+            var roles = args.AntagRoles;
+            var prefs = _prefs.GetPreferences(args.Session.UserId);
+            profile = prefs.SelectProfileForAntag(roles);
+        }
 
-
+        // If we can't find one, give them a random humanoid
+        profile ??= HumanoidCharacterProfile.RandomWithSpecies();
         if (profile?.Species is not { } speciesId || !_proto.Resolve(speciesId, out var species))
         {
             species = _proto.Index<SpeciesPrototype>(SharedHumanoidAppearanceSystem.DefaultSpecies);
@@ -42,6 +48,9 @@ public sealed class AntagLoadProfileRuleSystem : GameRuleSystem<AntagLoadProfile
         {
             species = _proto.Index(ent.Comp.SpeciesOverride.Value);
         }
+
+        if(ent.Comp.SpeciesHardOverride is not null)
+            species = _proto.Index(ent.Comp.SpeciesHardOverride.Value);
 
         args.Entity = Spawn(species.Prototype);
         _humanoid.LoadProfile(args.Entity.Value, profile?.WithSpecies(species.ID));

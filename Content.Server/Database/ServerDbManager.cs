@@ -37,16 +37,14 @@ namespace Content.Server.Database
             ICharacterProfile defaultProfile,
             CancellationToken cancel);
 
-        Task SaveSelectedCharacterIndexAsync(NetUserId userId, int index);
-
         Task SaveCharacterSlotAsync(NetUserId userId, ICharacterProfile? profile, int slot);
+
+        Task SaveJobPrioritiesAsync(NetUserId userId, Dictionary<ProtoId<JobPrototype>, JobPriority> newJobPriorities);
 
         Task SaveAdminOOCColorAsync(NetUserId userId, Color color);
 
         Task SaveConstructionFavoritesAsync(NetUserId userId, List<ProtoId<ConstructionPrototype>> constructionFavorites);
 
-        // Single method for two operations for transaction.
-        Task DeleteSlotAndSetSelectedIndex(NetUserId userId, int deleteSlot, int newSlot);
         Task<PlayerPreferences?> GetPlayerPreferencesAsync(NetUserId userId, CancellationToken cancel);
         #endregion
 
@@ -206,6 +204,13 @@ namespace Content.Server.Database
             int serverId);
 
         Task AddServerBanHitsAsync(int connection, IEnumerable<ServerBanDef> bans);
+
+        #endregion
+
+        #region Player data
+        /// 🌟Starlight🌟
+        Task SetPlayerDataForAsync(NetUserId userId, StarLightModel.PlayerDataDTO data, CancellationToken cancel = default);
+        Task<StarLightModel.PlayerDataDTO?> GetPlayerDataForAsync(NetUserId userId, CancellationToken cancel = default);
 
         #endregion
 
@@ -468,22 +473,17 @@ namespace Content.Server.Database
             return RunDbCommand(() => _db.InitPrefsAsync(userId, defaultProfile));
         }
 
-        public Task SaveSelectedCharacterIndexAsync(NetUserId userId, int index)
-        {
-            DbWriteOpsMetric.Inc();
-            return RunDbCommand(() => _db.SaveSelectedCharacterIndexAsync(userId, index));
-        }
-
         public Task SaveCharacterSlotAsync(NetUserId userId, ICharacterProfile? profile, int slot)
         {
             DbWriteOpsMetric.Inc();
             return RunDbCommand(() => _db.SaveCharacterSlotAsync(userId, profile, slot));
         }
 
-        public Task DeleteSlotAndSetSelectedIndex(NetUserId userId, int deleteSlot, int newSlot)
+        public Task SaveJobPrioritiesAsync(NetUserId userId,
+            Dictionary<ProtoId<JobPrototype>, JobPriority> newJobPriorities)
         {
             DbWriteOpsMetric.Inc();
-            return RunDbCommand(() => _db.DeleteSlotAndSetSelectedIndex(userId, deleteSlot, newSlot));
+            return RunDbCommand(() => _db.SaveJobPrioritiesAsync(userId, newJobPriorities));
         }
 
         public Task SaveAdminOOCColorAsync(NetUserId userId, Color color)
@@ -666,6 +666,19 @@ namespace Content.Server.Database
             DbWriteOpsMetric.Inc();
             return RunDbCommand(() => _db.AddServerBanHitsAsync(connection, bans));
         }
+        //🌟Starlight🌟 start
+        public Task<StarLightModel.PlayerDataDTO?> GetPlayerDataForAsync(NetUserId userId, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetPlayerDataDTOForAsync(userId, cancel));
+        }
+        public Task SetPlayerDataForAsync(NetUserId userId, StarLightModel.PlayerDataDTO data, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.SetPlayerDataForAsync(userId, data, cancel));
+        }
+
+        //🌟Starlight🌟 end
 
         public Task<Admin?> GetAdminDataForAsync(NetUserId userId, CancellationToken cancel = default)
         {

@@ -176,10 +176,10 @@ namespace Content.Server.GameTicking
             }
         }
 
-        public HumanoidCharacterProfile GetPlayerProfile(ICommonSession p)
-        {
-            return (HumanoidCharacterProfile) _prefsManager.GetPreferences(p.UserId).SelectedCharacter;
-        }
+        // public HumanoidCharacterProfile GetPlayerProfile(ICommonSession p)
+        // {
+        //     return (HumanoidCharacterProfile) _prefsManager.GetPreferences(p.UserId).SelectedCharacter;
+        // }
 
         public void PlayerJoinGame(ICommonSession session, bool silent = false)
         {

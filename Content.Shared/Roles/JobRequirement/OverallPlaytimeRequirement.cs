@@ -1,11 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.Localizations;
+using Content.Shared._Starlight;
 using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.Preferences;
 using JetBrains.Annotations;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
+//using Content.Shared._NullLink;
 
 namespace Content.Shared.Roles;
 
@@ -18,12 +21,22 @@ public sealed partial class OverallPlaytimeRequirement : JobRequirement
     public TimeSpan Time;
 
     public override bool Check(IEntityManager entManager,
+        ICommonSession? player,
         IPrototypeManager protoManager,
         HumanoidCharacterProfile? profile,
-        IReadOnlyDictionary<string, TimeSpan> playTimes,
+        IReadOnlyDictionary<string, TimeSpan>? playTimes,
         [NotNullWhen(false)] out FormattedMessage? reason)
     {
         reason = new FormattedMessage();
+
+        // If playTimes is null, we're not going to check against playtime requirements
+        if (playTimes == null)
+            return true;
+
+        //NullLink start
+        // if (player is not null && IoCManager.Resolve<ISharedNullLinkPlayerRolesReqManager>().IsAllRolesAvailable(player))
+        //     return true;
+        //NullLink end
 
         var overallTime = playTimes.GetValueOrDefault(PlayTimeTrackingShared.TrackerOverall);
         var overallDiffSpan = Time - overallTime;

@@ -31,6 +31,11 @@ using Content.Shared.Kitchen;
 using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.Players.RateLimiting;
 
+#region Starlight
+using Content.Server._Starlight;
+using Content.Shared._Starlight;
+#endregion Starlight
+
 namespace Content.Server.IoC;
 
 internal static class ServerContentIoC
@@ -80,5 +85,10 @@ internal static class ServerContentIoC
         deps.Register<CVarControlManager>();
         deps.Register<DiscordLink>();
         deps.Register<DiscordChatLink>();
+
+        // 🌟Starlight🌟 start
+        deps.Register<ISharedPlayersRoleManager, PlayerRolesManager>();
+        deps.Register<IPlayerRolesManager, PlayerRolesManager>();
+        // Starlight end
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Administration.UI;
@@ -6,6 +7,7 @@ using Content.Server.EUI;
 using Content.Server.Ghost.Roles;
 using Content.Server.Mind;
 using Content.Server.Prayer;
+using Content.Server.Preferences.Managers;
 using Content.Server.Silicons.Laws;
 using Content.Server.Station.Systems;
 using Content.Shared.Administration;
@@ -16,10 +18,12 @@ using Content.Shared.Configurable;
 using Content.Shared.Database;
 using Content.Shared.Examine;
 using Content.Shared.GameTicking;
+using Content.Shared.Humanoid;
 using Content.Shared.Inventory;
 using Content.Shared.Mind.Components;
 using Content.Shared.Movement.Components;
 using Content.Shared.Popups;
+using Content.Shared.Preferences;
 using Content.Shared.Silicons.Laws.Components;
 using Content.Shared.Silicons.StationAi;
 using Content.Shared.Verbs;
@@ -34,8 +38,11 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Toolshed;
 using Robust.Shared.Utility;
-using System.Linq;
 using static Content.Shared.Configurable.ConfigurationComponent;
+// using Content.Shared._Starlight.Thaven.Components; //Starlight
+// using Content.Server._Starlight.Thaven; //Starlight
+using Content.Server.Traits; // Starlight
+using Content.Shared._Starlight.Character.Info; //Starlight
 
 namespace Content.Server.Administration.Systems
 {
@@ -66,6 +73,11 @@ namespace Content.Server.Administration.Systems
         [Dependency] private readonly AdminFrozenSystem _freeze = default!;
         [Dependency] private readonly IPlayerManager _playerManager = default!;
         [Dependency] private readonly SiliconLawSystem _siliconLawSystem = default!;
+        [Dependency] private readonly SharedHumanoidAppearanceSystem _humanoidAppearance = default!;
+        [Dependency] private readonly IServerPreferencesManager _prefsManager = default!;
+        // [Dependency] private readonly ThavenMoodsSystem _moods = default!; //Starlight
+        [Dependency] private readonly TraitSystem _traitSystem = default!; //Starlight
+        [Dependency] private readonly SLSharedCharacterInfoSystem _sLSharedCharacterInfoSystem = default!; //Starlight
 
         private readonly Dictionary<ICommonSession, List<EditSolutionsEui>> _openSolutionUis = new();
 
@@ -98,7 +110,7 @@ namespace Content.Server.Administration.Systems
                 mark.Text = Loc.GetString("toolshed-verb-mark");
                 mark.Message = Loc.GetString("toolshed-verb-mark-description");
                 mark.Category = VerbCategory.Admin;
-                mark.Act = () => _toolshed.InvokeCommand(player, "=> $marked", new List<EntityUid> {args.Target}, out _);
+                mark.Act = () => _toolshed.InvokeCommand(player, "=> $marked", new List<EntityUid> { args.Target }, out _);
                 mark.Impact = LogImpact.Low;
                 args.Verbs.Add(mark);
 
@@ -130,30 +142,39 @@ namespace Content.Server.Administration.Systems
                     args.Verbs.Add(prayerVerb);
 
                     // Spawn - Like respawn but on the spot.
-                    args.Verbs.Add(new Verb()
+                    var pref = _prefsManager.GetPreferences(targetActor.PlayerSession.UserId);
+                    foreach (var (slot, profile) in pref.Characters)
                     {
-                        Text = Loc.GetString("admin-player-actions-spawn"),
-                        Category = VerbCategory.Admin,
-                        Act = () =>
+                        if (profile is not HumanoidCharacterProfile humanoid)
+                            continue;
+
+                        args.Verbs.Add(new Verb()
                         {
-                            if (!_transformSystem.TryGetMapOrGridCoordinates(args.Target, out var coords))
+                            Text = $"{slot}. {profile.Name}",
+                            Category = VerbCategory.Spawn,
+                            Act = () =>
                             {
-                                _popup.PopupEntity(Loc.GetString("admin-player-spawn-failed"), args.User, args.User);
-                                return;
-                            }
+                                if (!_transformSystem.TryGetMapOrGridCoordinates(args.Target, out var coords))
+                                {
+                                    _popup.PopupEntity(Loc.GetString("admin-player-spawn-failed"), args.User, args.User);
+                                    return;
+                                }
 
-                            var stationUid = _stations.GetOwningStation(args.Target);
+                                var stationUid = _stations.GetOwningStation(args.Target);
 
-                            var profile = _gameTicker.GetPlayerProfile(targetActor.PlayerSession);
-                            var mobUid = _spawning.SpawnPlayerMob(coords.Value, null, profile, stationUid);
+                                var mobUid = _spawning.SpawnPlayerMob(coords.Value, null, humanoid, stationUid);
 
-                            if (_mindSystem.TryGetMind(args.Target, out var mindId, out var mindComp))
-                                _mindSystem.TransferTo(mindId, mobUid, true, mind: mindComp);
+                                _traitSystem.ApplyTraits(mobUid, humanoid); // Starlight
+                                _sLSharedCharacterInfoSystem.ApplyCharacterInfo(mobUid, humanoid); // Starlight
 
-                        },
-                        ConfirmationPopup = true,
-                        Impact = LogImpact.High,
-                    });
+                                if (_mindSystem.TryGetMind(args.Target, out var mindId, out var mindComp))
+                                    _mindSystem.TransferTo(mindId, mobUid, true, mind: mindComp);
+
+                            },
+                            ConfirmationPopup = true,
+                            Impact = LogImpact.High,
+                        });
+                    }
 
                     // Clone - Spawn but without the mind transfer, also spawns at the user's coordinates not the target's
                     args.Verbs.Add(new Verb()
@@ -169,9 +190,13 @@ namespace Content.Server.Administration.Systems
                             }
 
                             var stationUid = _stations.GetOwningStation(args.Target);
-
-                            var profile = _gameTicker.GetPlayerProfile(targetActor.PlayerSession);
-                            _spawning.SpawnPlayerMob(coords.Value, null, profile, stationUid);
+                            var profile = _humanoidAppearance.GetBaseProfile(args.Target);
+                            var mobUid = _spawning.SpawnPlayerMob(coords.Value, null, profile, stationUid);
+                            if (profile is HumanoidCharacterProfile humanoid) // Starlight
+                            {
+                                _traitSystem.ApplyTraits(mobUid, humanoid);
+                                _sLSharedCharacterInfoSystem.ApplyCharacterInfo(mobUid, humanoid);
+                            }
                         },
                         ConfirmationPopup = true,
                         Impact = LogImpact.High,
@@ -209,7 +234,8 @@ namespace Content.Server.Administration.Systems
                     args.Verbs.Add(new Verb
                     {
                         Text = Loc.GetString("admin-player-actions-respawn"),
-                        Category = VerbCategory.Admin,
+                        Priority = -1,
+                        Category = VerbCategory.Spawn,
                         Act = () =>
                         {
                             _console.ExecuteCommand(player, $"respawn \"{mindComp.UserId}\"");
@@ -239,7 +265,7 @@ namespace Content.Server.Administration.Systems
                         Priority = -1, // This is just so it doesn't change position in the menu between freeze/unfreeze.
                         Text = Loc.GetString("admin-verbs-freeze"),
                         Category = VerbCategory.Admin,
-                        Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
+                        Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
                         Act = () =>
                         {
                             EnsureComp<AdminFrozenComponent>(args.Target);
@@ -256,7 +282,7 @@ namespace Content.Server.Administration.Systems
                         Priority = -1, // This is just so it doesn't change position in the menu between freeze/unfreeze.
                         Text = Loc.GetString("admin-verbs-freeze-and-mute"),
                         Category = VerbCategory.Admin,
-                        Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
+                        Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
                         Act = () =>
                         {
                             _freeze.FreezeAndMute(args.Target);
@@ -272,7 +298,7 @@ namespace Content.Server.Administration.Systems
                         Priority = -1, // This is just so it doesn't change position in the menu between freeze/unfreeze.
                         Text = Loc.GetString("admin-verbs-unfreeze"),
                         Category = VerbCategory.Admin,
-                        Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
+                        Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/snow.svg.192dpi.png")),
                         Act = () =>
                         {
                             RemComp<AdminFrozenComponent>(args.Target);
@@ -294,7 +320,7 @@ namespace Content.Server.Administration.Systems
                         {
                             var ui = new AdminLogsEui();
                             _euiManager.OpenEui(ui, player);
-                            ui.SetLogFilter(search:args.Target.Id.ToString());
+                            ui.SetLogFilter(search: args.Target.Id.ToString());
                         },
                         Impact = LogImpact.Low
                     };
@@ -306,7 +332,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("admin-verbs-teleport-to"),
                     Category = VerbCategory.Admin,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/open.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/open.svg.192dpi.png")),
                     Act = () =>
                     {
                         _console.ExecuteCommand(player, $"tpto {GetNetEntity(args.Target)}");
@@ -319,7 +345,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("admin-verbs-teleport-here"),
                     Category = VerbCategory.Admin,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/close.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/close.svg.192dpi.png")),
                     Act = () =>
                     {
                         if (HasComp<MapGridComponent>(args.Target))
@@ -405,6 +431,29 @@ namespace Content.Server.Administration.Systems
                     },
                     Impact = LogImpact.Low
                 });
+
+                #region Starlight Thaven
+                // Begin Impstation Additions
+                // if (TryComp<ThavenMoodsComponent>(args.Target, out var moods))
+                // {
+                //     args.Verbs.Add(new Verb()
+                //     {
+                //         Text = Loc.GetString("thaven-moods-ui-verb"),
+                //         Category = VerbCategory.Admin,
+                //         Act = () =>
+                //         {
+                //             var ui = new ThavenMoodsEui(_moods, EntityManager, _adminManager);
+                //             if (!_playerManager.TryGetSessionByEntity(args.User, out var session))
+                //                 return;
+
+                //             _euiManager.OpenEui(ui, session);
+                //             ui.UpdateMoods((args.Target, moods));
+                //         },
+                //         Icon = new SpriteSpecifier.Rsi(new ResPath("/Textures/Interface/Actions/actions_borg.rsi"), "state-laws"),
+                //     });
+                // }
+                #endregion
+                // End Impstation Additions
             }
         }
 
@@ -422,7 +471,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("delete-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/delete_transparent.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/delete_transparent.svg.192dpi.png")), //Starlight
                     Act = () => Del(args.Target),
                     Impact = LogImpact.Medium,
                     ConfirmationPopup = true
@@ -437,7 +486,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("rejuvenate-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/rejuvenate.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/rejuvenate.svg.192dpi.png")),
                     Act = () => _rejuvenate.PerformRejuvenate(args.Target),
                     Impact = LogImpact.Medium
                 };
@@ -472,7 +521,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("make-sentient-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")), //Starlight
                     Act = () => _mindSystem.MakeSentient(args.Target),
                     Impact = LogImpact.Medium
                 };
@@ -501,7 +550,7 @@ namespace Content.Server.Administration.Systems
                     {
                         Text = Loc.GetString("set-outfit-verb-get-data-text"),
                         Category = VerbCategory.Debug,
-                        Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/outfit.svg.192dpi.png")),
+                        Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/outfit.svg.192dpi.png")),
                         Act = () => _euiManager.OpenEui(new SetOutfitEui(GetNetEntity(args.Target)), player),
                         Impact = LogImpact.Medium
                     };
@@ -516,7 +565,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("in-range-unoccluded-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/information.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/information.svg.192dpi.png")),
                     Act = () =>
                     {
 
@@ -538,7 +587,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("tube-direction-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/information.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/information.svg.192dpi.png")),
                     Act = () => _disposalTubes.PopupDirections(args.Target, tube, args.User)
                 };
                 args.Verbs.Add(verb);
@@ -564,7 +613,7 @@ namespace Content.Server.Administration.Systems
                 Verb verb = new()
                 {
                     Text = Loc.GetString("configure-verb-get-data-text"),
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/settings.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/settings.svg.192dpi.png")),
                     Category = VerbCategory.Debug,
                     Act = () => _uiSystem.OpenUi(args.Target, ConfigurationUiKey.Key, actor.PlayerSession)
                 };
@@ -579,7 +628,7 @@ namespace Content.Server.Administration.Systems
                 {
                     Text = Loc.GetString("edit-solutions-verb-get-data-text"),
                     Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/spill.svg.192dpi.png")),
+                    Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/spill.svg.192dpi.png")),
                     Act = () => OpenEditSolutionsEui(player, args.Target),
                     Impact = LogImpact.Medium // maybe high depending on WHAT reagents they add...
                 };
@@ -609,7 +658,8 @@ namespace Content.Server.Administration.Systems
             _euiManager.OpenEui(eui, session);
             eui.StateDirty();
 
-            if (!_openSolutionUis.ContainsKey(session)) {
+            if (!_openSolutionUis.ContainsKey(session))
+            {
                 _openSolutionUis[session] = new List<EditSolutionsEui>();
             }
 
@@ -620,7 +670,7 @@ namespace Content.Server.Administration.Systems
         {
             _openSolutionUis[session].Remove(eui);
             if (_openSolutionUis[session].Count == 0)
-              _openSolutionUis.Remove(session);
+                _openSolutionUis.Remove(session);
         }
 
         private void Reset(RoundRestartCleanupEvent ev)

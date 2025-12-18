@@ -2,7 +2,6 @@ using System.Linq;
 using Content.Client.CharacterInfo;
 using Content.Client.Gameplay;
 using Content.Client.Stylesheets;
-using Content.Client.UserInterface.Controls;
 using Content.Client.UserInterface.Systems.Character.Controls;
 using Content.Client.UserInterface.Systems.Character.Windows;
 using Content.Client.UserInterface.Systems.Objectives.Controls;
@@ -16,8 +15,8 @@ using Robust.Client.Player;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controllers;
 using Robust.Client.UserInterface.Controls;
-using Robust.Shared.Input.Binding;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Input.Binding;
 using Robust.Shared.Utility;
 using static Content.Client.CharacterInfo.CharacterInfoSystem;
 using static Robust.Client.UserInterface.Controls.BaseButton;
@@ -25,7 +24,7 @@ using static Robust.Client.UserInterface.Controls.BaseButton;
 namespace Content.Client.UserInterface.Systems.Character;
 
 [UsedImplicitly]
-public sealed class CharacterUIController : UIController, IOnStateEntered<GameplayState>, IOnStateExited<GameplayState>, IOnSystemChanged<CharacterInfoSystem>
+public sealed partial class CharacterUIController : UIController, IOnStateEntered<GameplayState>, IOnStateExited<GameplayState>, IOnSystemChanged<CharacterInfoSystem>
 {
     [Dependency] private readonly IEntityManager _ent = default!;
     [Dependency] private readonly IPlayerManager _player = default!;
@@ -42,7 +41,7 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
     }
 
     private CharacterWindow? _window;
-    private MenuButton? CharacterButton => UIManager.GetActiveUIWidgetOrNull<MenuBar.Widgets.GameTopMenuBar>()?.CharacterButton;
+    private UserInterface.Controls.MenuButton? CharacterButton => UIManager.GetActiveUIWidgetOrNull<MenuBar.Widgets.GameTopMenuBar>()?.CharacterButton;
 
     public void OnStateEntered(GameplayState state)
     {
@@ -130,16 +129,18 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
             return;
         }
 
-        var (entity, job, objectives, briefing, entityName) = data;
+        var (entity, job, objectives, /* minds, */ briefing, entityName) = data;
 
-        _window.SpriteView.SetEntity(entity);
+        //starlight start
+        _window.CharacterInfo.CharacterPreview.SetCharacter(entity, job);
+        SLSetSelfCharacterInfo();
+
 
         UpdateRoleType();
-
-        _window.NameLabel.Text = entityName;
-        _window.SubText.Text = job;
-        _window.Objectives.RemoveAllChildren();
-        _window.ObjectivesLabel.Visible = objectives.Any();
+        _window.CharacterInfo.Objectives.RemoveAllChildren();
+        _window.CharacterInfo.ObjectivesLabel.Visible = objectives.Any();
+        _window.CharacterInfo.Minds.RemoveAllChildren();
+        //starlight end
 
         foreach (var (groupId, conditions) in objectives)
         {
@@ -177,8 +178,29 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
                 objectiveControl.AddChild(conditionControl);
             }
 
-            _window.Objectives.AddChild(objectiveControl);
+            _window.CharacterInfo.Objectives.AddChild(objectiveControl); //starlight
         }
+
+
+        // if (minds != null && minds.Count > 0)
+        // {
+        //     var mindsControl = new CharacterMindsControl
+        //     {
+        //         Orientation = BoxContainer.LayoutOrientation.Vertical
+        //     };
+        //     var mindDescriptionMessage = new FormattedMessage();
+        //     mindDescriptionMessage.AddText("Available collective minds:");
+        //     foreach (var mindPrototype in minds)
+        //     {
+        //         mindDescriptionMessage.AddText("\n");
+        //         mindDescriptionMessage.PushColor(mindPrototype.Key.Color);
+        //         mindDescriptionMessage.AddText($"{mindPrototype.Key.LocalizedName}: +{mindPrototype.Key.KeyCode}");
+        //         mindDescriptionMessage.AddText($" (Number {mindPrototype.Value.MindId})");
+        //         mindDescriptionMessage.Pop();
+        //     }
+        //     mindsControl.Description.SetMessage(mindDescriptionMessage);
+        //     _window.CharacterInfo.Objectives.AddChild(mindsControl); //starlight
+        // }
 
         if (briefing != null)
         {
@@ -187,16 +209,16 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
             text.PushColor(Color.Yellow);
             text.AddText(briefing);
             briefingControl.Label.SetMessage(text);
-            _window.Objectives.AddChild(briefingControl);
+            _window.CharacterInfo.Objectives.AddChild(briefingControl); //starlight
         }
 
-        var controls = _characterInfo.GetCharacterInfoControls(entity);
+        var controls = _characterInfo.GetCharacterInfoControls(entity); //starlight
         foreach (var control in controls)
         {
-            _window.Objectives.AddChild(control);
+            _window.CharacterInfo.Objectives.AddChild(control); //starlight
         }
 
-        _window.RolePlaceholder.Visible = briefing == null && !controls.Any() && !objectives.Any();
+        _window.CharacterInfo.RolePlaceholder.Visible = briefing == null && !controls.Any() && !objectives.Any();
     }
 
     private void OnRoleTypeChanged(MindRoleTypeChangedEvent ev, EntitySessionEventArgs _)
@@ -219,8 +241,8 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
         if (!_prototypeManager.TryIndex(mind.RoleType, out var proto))
             Log.Error($"Player '{_player.LocalSession}' has invalid Role Type '{mind.RoleType}'. Displaying default instead");
 
-        _window.RoleType.Text = Loc.GetString(proto?.Name ?? "role-type-crew-aligned-name");
-        _window.RoleType.FontColorOverride = proto?.Color ?? Color.White;
+        _window.CharacterInfo.RoleType.Text = Loc.GetString(proto?.Name ?? "role-type-crew-aligned-name"); //starlight
+        _window.CharacterInfo.RoleType.FontColorOverride = proto?.Color ?? Color.White; //starlight
     }
 
     private void CharacterDetached(EntityUid uid)
@@ -248,10 +270,12 @@ public sealed class CharacterUIController : UIController, IOnStateEntered<Gamepl
         if (_window.IsOpen)
         {
             CloseWindow();
+            SLClearSelfCharacterInfo(); //starlight
         }
         else
         {
             _characterInfo.RequestCharacterInfo();
+            SLSetSelfCharacterInfo(); //starlight
             _window.Open();
         }
     }

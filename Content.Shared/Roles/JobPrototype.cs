@@ -32,6 +32,9 @@ namespace Content.Shared.Roles
         [DataField]
         public string Name { get; private set; } = string.Empty;
 
+        [DataField("hidden")] // 🌟Starlight🌟
+        public bool Hidden { get; private set; } = false;
+
         [ViewVariables(VVAccess.ReadOnly)]
         public string LocalizedName => Loc.GetString(Name);
 

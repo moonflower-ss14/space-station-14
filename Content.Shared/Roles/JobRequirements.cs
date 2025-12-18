@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.Preferences;
+using Robust.Shared.Network;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
@@ -17,7 +19,8 @@ public static class JobRequirements
     /// <returns>Returns true if all requirements were met or there were no requirements.</returns>
     public static bool TryRequirementsMet(
         JobPrototype job,
-        IReadOnlyDictionary<string, TimeSpan> playTimes,
+        ICommonSession? player,
+        IReadOnlyDictionary<string, TimeSpan>? playTimes,
         [NotNullWhen(false)] out FormattedMessage? reason,
         IEntityManager entManager,
         IPrototypeManager protoManager,
@@ -25,7 +28,7 @@ public static class JobRequirements
     {
         var sys = entManager.System<SharedRoleSystem>();
         var requirements = sys.GetRoleRequirements(job);
-        return TryRequirementsMet(requirements, playTimes, out reason, entManager, protoManager, profile);
+        return TryRequirementsMet(requirements, player, playTimes, out reason, entManager, protoManager, profile);
     }
 
     /// <summary>
@@ -37,7 +40,8 @@ public static class JobRequirements
     /// <returns>Returns true if all requirements were met or there were no requirements.</returns>
     public static bool TryRequirementsMet(
         HashSet<JobRequirement>? requirements,
-        IReadOnlyDictionary<string, TimeSpan> playTimes,
+        ICommonSession? player,
+        IReadOnlyDictionary<string, TimeSpan>? playTimes,
         [NotNullWhen(false)] out FormattedMessage? reason,
         IEntityManager entManager,
         IPrototypeManager protoManager,
@@ -49,11 +53,27 @@ public static class JobRequirements
 
         foreach (var requirement in requirements)
         {
-            if (!requirement.Check(entManager, protoManager, profile, playTimes, out reason))
+            if (!requirement.Check(entManager, player, protoManager, profile, playTimes, out reason))
                 return false;
         }
 
         return true;
+    }
+
+    public static bool TryRequirementsMet(
+        ProtoId<JobPrototype> job,
+        ICommonSession? player,
+        IReadOnlyDictionary<string, TimeSpan>? playTimes,
+        [NotNullWhen(false)] out FormattedMessage? reason,
+        IEntityManager entManager,
+        IPrototypeManager protoManager,
+        HumanoidCharacterProfile? profile)
+    {
+        if (protoManager.TryIndex(job, out var jobProto))
+            return TryRequirementsMet(jobProto, player, playTimes, out reason, entManager, protoManager, profile);
+
+        reason = FormattedMessage.FromUnformatted("Failed to get job prototype");
+        return false;
     }
 }
 
@@ -69,8 +89,9 @@ public abstract partial class JobRequirement
 
     public abstract bool Check(
         IEntityManager entManager,
+        ICommonSession? player,
         IPrototypeManager protoManager,
         HumanoidCharacterProfile? profile,
-        IReadOnlyDictionary<string, TimeSpan> playTimes,
+        IReadOnlyDictionary<string, TimeSpan>? playTimes,
         [NotNullWhen(false)] out FormattedMessage? reason);
 }
