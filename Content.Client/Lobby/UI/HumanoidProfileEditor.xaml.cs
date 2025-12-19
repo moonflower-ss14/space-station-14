@@ -57,11 +57,9 @@ namespace Content.Client.Lobby.UI
         private int _maxNameLength;
         private bool _allowFlavorText;
 
-        //begin starlight
-        private bool _allowCharacterSecrets;
-        private bool _allowExploitables;
-        private bool _allowRPNotes;
-        //end starlight
+        private FlavorText.FlavorText? _flavorText;
+        private TextEdit? _flavorTextEdit;
+
 
         // One at a time.
         private LoadoutWindow? _loadoutWindow;
@@ -247,7 +245,7 @@ namespace Content.Client.Lobby.UI
                 SetSpecies(_species[args.Id].ID);
                 UpdateHairPickers();
                 OnSkinColorOnValueChanged();
-                UpdateCustomSpecieNameEdit(); // Starlight
+                // UpdateCustomSpecieNameEdit(); // Starlight
             };
 
             //starlight start
@@ -494,6 +492,8 @@ namespace Content.Client.Lobby.UI
 
             #endregion Markings
 
+            RefreshFlavorText();
+
             // Starlight
             // #region Cybernetics
             // Cybernetics.OnCyberneticsUpdated += OnCyberneticsUpdated;
@@ -549,7 +549,7 @@ namespace Content.Client.Lobby.UI
             // SiliconVoicePreviewButton.OnPressed +=
             //     _ => _entManager.System<TextToSpeechSystem>().RequestPreviewTts(Profile?.SiliconVoice ?? "");
 
-            // SetupTabs();
+            SetupTabs();
             // // Cosmatic Drift Record System-start
             // _recordsTab = CreateRecordEditorTab(); // Instantiate the CD record editor UI
             // // Cosmatic Drift Record System-end
@@ -557,6 +557,8 @@ namespace Content.Client.Lobby.UI
             // RefreshCharacterInfo();
             // // 🌟Starlight🌟 end
         }
+
+
         // private void UpdateVoicesControls()
         // {
         //     if (Profile is null)
@@ -593,9 +595,6 @@ namespace Content.Client.Lobby.UI
             TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-antags-tab"));
             TabContainer.SetTabTitle(3, Loc.GetString("humanoid-profile-editor-traits-tab"));
             TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-markings-tab"));
-            TabContainer.SetTabTitle(5, Loc.GetString("humanoid-profile-editor-cybernetics-tab"));
-            TabContainer.SetTabTitle(6, Loc.GetString("humanoid-profile-editor-ic-info-tab"));
-            TabContainer.SetTabTitle(7, Loc.GetString("humanoid-profile-editor-ooc-info-tab"));
         }
         // Cosmatic Drift Record System-start: Build the CD record editor tab and hook persistence callbacks
         // private RecordEditorGui CreateRecordEditorTab()
@@ -656,26 +655,54 @@ namespace Content.Client.Lobby.UI
         //     OOCInfoEditor.OOCNotesInput.OnTextChanged += OnOOCNotesChanged;
         // }
 
-        // /// <summary>
-        // /// Refreshes the flavor text editor status.
-        // /// </summary>
-        // public void RefreshCharacterInfo()
-        // {
-        //     if (ICInfoEditor.VisibleInTree)
-        //     {
-        //         ICInfoEditor.Physical.Visible = _allowFlavorText;
-        //         ICInfoEditor.Personality.Visible = _allowFlavorText;
-        //         ICInfoEditor.Secrets.Visible = _allowCharacterSecrets;
-        //         ICInfoEditor.Exploitable.Visible = _allowCharacterSecrets;
-        //     }
-        //     if (OOCInfoEditor.VisibleInTree)
-        //     {
-        //         OOCInfoEditor.OOCNotes.Visible = _allowRPNotes;
-        //         OOCInfoEditor.PersonalNotes.Visible = _allowRPNotes;
-        //     }
-        // }
+        /// <summary>
+        /// Refreshes the flavor text editor status.
+        /// </summary>
+        public void RefreshCharacterInfo()
+        {
+            // if (ICInfoEditor.VisibleInTree)
+            // {
+            //     ICInfoEditor.Physical.Visible = _allowFlavorText;
+            //     ICInfoEditor.Personality.Visible = _allowFlavorText;
+            //     ICInfoEditor.Secrets.Visible = _allowCharacterSecrets;
+            //     ICInfoEditor.Exploitable.Visible = _allowCharacterSecrets;
+            // }
+            // if (OOCInfoEditor.VisibleInTree)
+            // {
+            //     OOCInfoEditor.OOCNotes.Visible = _allowRPNotes;
+            //     OOCInfoEditor.PersonalNotes.Visible = _allowRPNotes;
+            // }
+        }
 
         // 🌟Starlight🌟 end
+
+         public void RefreshFlavorText()
+        {
+            if (_allowFlavorText)
+            {
+                if (_flavorText != null)
+                    return;
+
+                _flavorText = new FlavorText.FlavorText();
+                TabContainer.AddChild(_flavorText);
+                TabContainer.SetTabTitle(TabContainer.ChildCount - 1, Loc.GetString("humanoid-profile-editor-flavortext-tab"));
+                _flavorTextEdit = _flavorText.CFlavorTextInput;
+
+                _flavorText.OnFlavorTextChanged += OnFlavorTextChange;
+            }
+            else
+            {
+                if (_flavorText == null)
+                    return;
+
+                TabContainer.RemoveChild(_flavorText);
+                _flavorText.OnFlavorTextChanged -= OnFlavorTextChange;
+                _flavorText.Dispose();
+                _flavorTextEdit?.Dispose();
+                _flavorTextEdit = null;
+                _flavorText = null;
+            }
+        }
 
         /// <summary>
         /// Refreshes traits selector
@@ -942,8 +969,9 @@ namespace Content.Client.Lobby.UI
             JobOverride = null;
 
             UpdateNameEdit();
-            UpdateCustomSpecieNameEdit(); // Starlight
-            UpdateCharacterInfoEditorText(); //Starlight
+            UpdateFlavorTextEdit();
+            // UpdateCustomSpecieNameEdit(); // Starlight
+            // UpdateCharacterInfoEditorText(); //Starlight
             UpdateSexControls();
             UpdateGenderControls();
             //UpdateSizeControls(); //starlight
@@ -965,6 +993,7 @@ namespace Content.Client.Lobby.UI
             RefreshLoadouts();
             RefreshSpecies();
             RefreshTraits();
+            RefreshFlavorText();
             // Ensure the record editor reflects the freshly-loaded profile data.
             // Cosmatic Drift Record System-start
             //_recordsTab.Update(Profile); // Refresh record editor when a profile is loaded
@@ -1246,62 +1275,15 @@ namespace Content.Client.Lobby.UI
             UpdateJobPreferences();
         }
 
-        //starlight start
-        private void OnPhysicalDescChanged(TextEdit.TextEditEventArgs args)
+        private void OnFlavorTextChange(string content)
         {
             if (Profile is null)
                 return;
 
-            //Profile = Profile.WithPhysicalDesc(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
+            Profile = Profile.WithFlavorText(content);
+            SetDirty();
         }
 
-
-        private void OnPersonalityDescChanged(TextEdit.TextEditEventArgs args)
-        {
-            if (Profile is null)
-                return;
-
-            //Profile = Profile.WithPersonalityDesc(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
-        }
-
-        private void OnExploitablesChanged(TextEdit.TextEditEventArgs args)
-        {
-            if (Profile is null)
-                return;
-
-            //Profile = Profile.WithExploitable(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
-        }
-
-        private void OnSecretsChanged(TextEdit.TextEditEventArgs args)
-        {
-            if (Profile is null)
-                return;
-
-            //Profile = Profile.WithSecrets(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
-        }
-
-        private void OnPersonalNotesChanged(TextEdit.TextEditEventArgs args)
-        {
-            if (Profile is null)
-                return;
-
-            //Profile = Profile.WithPersonalNotes(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
-        }
-        private void OnOOCNotesChanged(TextEdit.TextEditEventArgs args)
-        {
-            if (Profile is null)
-                return;
-
-            //Profile = Profile.WithOOCNotes(Rope.Collapse(args.TextRope).Trim());
-            IsDirty = true;
-        }
-
-        //starlight end
 
         private void OnMarkingChange(MarkingSet markings)
         {
@@ -1510,27 +1492,12 @@ namespace Content.Client.Lobby.UI
             NameEdit.Text = Profile?.Name ?? "";
         }
 
-        // Starlight - Start
-        private void UpdateCustomSpecieNameEdit()
+        private void UpdateFlavorTextEdit()
         {
-            var species = _species.Find(x => x.ID == Profile?.Species) ?? _species.First();
-            //CCustomSpecieNameEdit.Text = string.IsNullOrEmpty(Profile?.CustomSpecieName) ? Loc.GetString(species.Name) : Profile.CustomSpecieName;
-            //CCustomSpecieName.Visible = species.CustomName;
-        }
-        // Starlight - End
-
-        private void UpdateCharacterInfoEditorText()
-        {
-            if (!_allowFlavorText)
-                return;
-            // ICInfoEditor.PhysicalDescInput.TextRope = new Rope.Leaf(Profile?.PhysicalDescription ?? "");
-            // ICInfoEditor.PersonalityDescInput.TextRope = new Rope.Leaf(Profile?.PersonalityDescription ?? "");
-            // ICInfoEditor.ExploitableInput.TextRope = new Rope.Leaf(Profile?.ExploitableInfo ?? "");
-            // ICInfoEditor.SecretsInput.TextRope = new Rope.Leaf(Profile?.Secrets ?? "");
-
-            // OOCInfoEditor.PersonalNotesInput.TextRope = new Rope.Leaf(Profile?.PersonalNotes ?? "");
-            // OOCInfoEditor.OOCNotesInput.TextRope = new Rope.Leaf(Profile?.OOCNotes ?? "");
-            return; // temp moonflower
+            if (_flavorTextEdit != null)
+            {
+                _flavorTextEdit.TextRope = new Rope.Leaf(Profile?.FlavorText ?? "");
+            }
         }
 
         private void UpdateAgeEdit()

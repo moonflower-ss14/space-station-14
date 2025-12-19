@@ -48,25 +48,18 @@
             <Control MinHeight="10" />
             <!-- tabContainer -->
             <TabContainer Name="TabContainer" VerticalExpand="True">
-                <BoxContainer Orientation="Vertical">
+                <BoxContainer Name="AppearanceTab" Orientation="Vertical">
                     <ScrollContainer VerticalExpand="True">
                         <!-- appearanceList -->
                         <BoxContainer Orientation="Vertical">
                             <BoxContainer Margin="10" Orientation="Vertical" HorizontalExpand="True">
                                 <!-- Species -->
                                 <BoxContainer HorizontalExpand="True">
-                                    <Label Text="{Loc 'humanoid-profile-editor-species-label'}" />
                                     <Control HorizontalExpand="True"/>
                                     <TextureButton Name="SpeciesInfoButton" Scale="0.3 0.3"
                                                    VerticalAlignment="Center"
                                                    ToolTip="{Loc 'humanoid-profile-editor-guidebook-button-tooltip'}"/>
                                     <OptionButton Name="SpeciesButton" HorizontalAlignment="Right" />
-                                </BoxContainer>
-                                <!-- Species // Starlight -->
-                                <BoxContainer Name="CCustomSpecieName" HorizontalExpand="True">
-                                    <Label Text="{Loc 'humanoid-profile-editor-customspeciename-label'}" />
-                                    <Control HorizontalExpand="True"/>
-                                    <LineEdit Name="CCustomSpecieNameEdit" MinSize="270 0" HorizontalAlignment="Right" />
                                 </BoxContainer>
                                 <!-- Age -->
                                 <BoxContainer HorizontalExpand="True">
@@ -98,12 +91,6 @@
                                     <Control HorizontalExpand="True"/>
                                     <OptionButton Name="SpawnPriorityButton" HorizontalAlignment="Right" />
                                 </BoxContainer>
-                                <BoxContainer HorizontalExpand="True">
-                                    <Label Text="{Loc 'humanoid-profile-editor-voice-label'}" />
-                                    <Control HorizontalExpand="True"/>
-                                    <OptionButton Name="VoiceButton" HorizontalAlignment="Left" />
-                                    <Button Name="VoicePreviewButton" Text="{Loc 'humanoid-profile-editor-voice-play'}" MaxWidth="80" />
-                                </BoxContainer>
                             </BoxContainer>
                             <!-- Skin -->
                             <BoxContainer Margin="10" HorizontalExpand="True" Orientation="Vertical">
@@ -124,19 +111,19 @@
                         </BoxContainer>
                     </ScrollContainer>
                 </BoxContainer>
-                <BoxContainer Orientation="Vertical">
+                <BoxContainer Name="JobTab" Orientation="Vertical">
                     <!-- Jobs -->
                     <ScrollContainer VerticalExpand="True">
                         <BoxContainer Name="JobList" Orientation="Vertical" />
                     </ScrollContainer>
                 </BoxContainer>
-                <BoxContainer Orientation="Vertical" Margin="10">
+                <BoxContainer Name="AntagTab" Orientation="Vertical" Margin="10">
                     <!-- Antags -->
                     <ScrollContainer VerticalExpand="True">
                         <BoxContainer Name="AntagList" Orientation="Vertical" />
                     </ScrollContainer>
                 </BoxContainer>
-                <BoxContainer Orientation="Vertical" Margin="10">
+                <BoxContainer Name="TraitsTab" Orientation="Vertical" Margin="10">
                     <!-- Traits -->
                     <ScrollContainer VerticalExpand="True">
                         <BoxContainer Name="TraitsList" Orientation="Vertical" />
@@ -148,26 +135,6 @@
                         <humanoid:MarkingPicker Name="Markings" IgnoreCategories="Hair,FacialHair" />
                     </ScrollContainer>
                 </BoxContainer>
-                <!-- Starlight -->
-<!--              <BoxContainer Name="CyberneticsTab" Orientation="Vertical" Margin="10">
-                    Cybernetics
-                    <ScrollContainer VerticalExpand="True">
-                        <humanoid:CyberneticsPicker Name="Cybernetics" />
-                    </ScrollContainer>
-                </BoxContainer>
-                Starlight start
-                <BoxContainer Name="ICInfoTab" Orientation="Vertical" Margin="10" Visible="False">
-                    <ScrollContainer VerticalExpand="True">
-                        <ui1:CharacterInfoEditor Name="ICInfoEditor"/>
-                    </ScrollContainer>
-                </BoxContainer>
-                <BoxContainer Name="OOCInfoTab" Orientation="Vertical" Margin="10" Visible="False">
-                    <ScrollContainer VerticalExpand="True">
-                        <ui1:OOCInfoEditor Name="OOCInfoEditor"/>
-                    </ScrollContainer>
-                </BoxContainer>
-                Starlight end
--->
             </TabContainer>
         </BoxContainer>
         <!-- Right side -->
