@@ -84,9 +84,9 @@ namespace Content.Server.Database
                 .Property(log => log.Markings)
                 .HasConversion(jsonByteArrayConverter);
             // Cosmatic Drift Record System-start: Reuse JSON-to-byte[] conversion so CD records persist correctly on SQLite
-            // modelBuilder.Entity<CDModel.CDProfile>()
-            //     .Property(profile => profile.CharacterRecords)
-            //     .HasConversion(jsonByteArrayConverter);
+            modelBuilder.Entity<CDModel.CDProfile>()
+                .Property(profile => profile.CharacterRecords)
+                .HasConversion(jsonByteArrayConverter);
             // Cosmatic Drift Record System-end
             // EF core can make this automatically unique on sqlite but not psql.
             modelBuilder.Entity<IPIntelCache>()

@@ -10,8 +10,9 @@ using Content.Client.Stylesheets;
 using Content.Client.Sprite;
 using Content.Client.UserInterface.Systems.Guidebook;
 // Cosmatic Drift Record System-start
-//using Content.Client._CD.Records.UI;
-//using Content.Shared._CD.Records;
+using System.Globalization;
+using Content.Client._CD.Records.UI;
+using Content.Shared._CD.Records;
 // Cosmatic Drift Record System-end
 using Content.Shared.CCVar;
 using Content.Shared.Clothing;
@@ -111,6 +112,9 @@ namespace Content.Client.Lobby.UI
         public event Action<List<ProtoId<GuideEntryPrototype>>>? OnOpenGuidebook;
 
         private readonly ISawmill _sawmill;
+
+        private readonly RecordEditorGui _recordsTab; // Tracks CD records UI state
+        private float _defaultHeight = 1f; // CD Height
 
         public HumanoidProfileEditor(
             IClientPreferencesManager preferencesManager,
@@ -248,33 +252,22 @@ namespace Content.Client.Lobby.UI
                 // UpdateCustomSpecieNameEdit(); // Starlight
             };
 
-            //starlight start
-            #region Size
-            // UpdateSizeControls();
+            // Begin CD - Character Records
+            #region CDHeight
 
-            // WidthSlider.OnValueChanged += args =>
-            // {
-            //     SetWidth(args.Value);
-            // };
+            CDHeightReset.OnPressed += _ =>
+            {
+                if (Profile is null) return;
+                if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype)) CDHeightSlider.Value = speciesPrototype.DefaultWidth;
+            };
 
-            // HeightSlider.OnValueChanged += args =>
-            // {
-            //     SetHeight(args.Value);
-            // };
+            CDHeightSlider.OnValueChanged += args =>
+            {
+                SetProfileHeight(args.Value);
+            };
 
-            // WidthResetButton.OnPressed += _ =>
-            // {
-            //     if (Profile is null) return;
-            //     if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype)) WidthSlider.Value = speciesPrototype.DefaultWidth;
-            // };
-
-            // HeightResetButton.OnPressed += _ =>
-            // {
-            //     if (Profile is null) return;
-            //     if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype)) HeightSlider.Value = speciesPrototype.DefaultHeight;
-            // };
-            #endregion Size
-            //starlight end
+            #endregion CDHeight
+            // End CD - Character Records
 
             #region Skin
 
@@ -550,9 +543,9 @@ namespace Content.Client.Lobby.UI
             //     _ => _entManager.System<TextToSpeechSystem>().RequestPreviewTts(Profile?.SiliconVoice ?? "");
 
             SetupTabs();
-            // // Cosmatic Drift Record System-start
-            // _recordsTab = CreateRecordEditorTab(); // Instantiate the CD record editor UI
-            // // Cosmatic Drift Record System-end
+            // Cosmatic Drift Record System-start
+            _recordsTab = CreateRecordEditorTab(); // Instantiate the CD record editor UI
+            // Cosmatic Drift Record System-end
             // SetupInfoEditors();
             // RefreshCharacterInfo();
             // // 🌟Starlight🌟 end
@@ -586,7 +579,6 @@ namespace Content.Client.Lobby.UI
         //     if (voiceChoiceId != -1)
         //         VoiceButton.TrySelectId(voiceChoiceId);
         // }
-        // 🌟Starlight🌟 Start
 
         private void SetupTabs()
         {
@@ -597,84 +589,21 @@ namespace Content.Client.Lobby.UI
             TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-markings-tab"));
         }
         // Cosmatic Drift Record System-start: Build the CD record editor tab and hook persistence callbacks
-        // private RecordEditorGui CreateRecordEditorTab()
-        // {
-        //     // Create the record editor in code so that we can provide a callback for saving edits back to the profile.
-        //     var recordEditor = new RecordEditorGui(UpdateProfileRecords)
-        //     {
-        //         HorizontalExpand = true,
-        //         VerticalExpand = true
-        //     };
-
-        //     TabContainer.AddChild(recordEditor);
-        //     TabContainer.SetTabTitle(TabContainer.ChildCount - 1, Loc.GetString("humanoid-profile-editor-cd-records-tab"));
-        //     recordEditor.Update(Profile);
-        //     return recordEditor;
-        // }
-        // Cosmatic Drift Record System-end
-
-        // private void UpdateSiliconVoicesControls()
-        // {
-        //     if (Profile is null)
-        //         return;
-
-        //     SiliconVoiceButton.Clear();
-
-        //     for (var i = 0; i < _siliconVoices.Count; i++)
-        //     {
-        //         var voice = _siliconVoices[i];
-
-        //         SiliconVoiceButton.AddItem($"[{voice.Sex}] {Loc.GetString(voice.Name)}", i);
-        //     }
-
-        //     if (string.IsNullOrEmpty(Profile.SiliconVoice))
-        //     {
-        //         var available = _siliconVoices.ToArray();
-        //         if (available.Length > 0)
-        //         {
-        //             var index = new Random().Next(0, available.Length);
-        //             Profile.SiliconVoice = available[index].ID;
-        //         }
-        //     }
-
-        //     var siliconVoiceChoiceId = _siliconVoices.FindIndex(x => x.ID == Profile.SiliconVoice);
-        //     if (siliconVoiceChoiceId != -1)
-        //         SiliconVoiceButton.TrySelectId(siliconVoiceChoiceId);
-        // }
-
-
-        // private void SetupInfoEditors()
-        // {
-        //     ICInfoEditor.PhysicalDescInput.OnTextChanged += OnPhysicalDescChanged;
-        //     ICInfoEditor.PersonalityDescInput.OnTextChanged += OnPersonalityDescChanged;
-        //     ICInfoEditor.ExploitableInput.OnTextChanged += OnExploitablesChanged;
-        //     ICInfoEditor.SecretsInput.OnTextChanged += OnSecretsChanged;
-
-
-        //     OOCInfoEditor.PersonalNotesInput.OnTextChanged += OnPersonalNotesChanged;
-        //     OOCInfoEditor.OOCNotesInput.OnTextChanged += OnOOCNotesChanged;
-        // }
-
-        /// <summary>
-        /// Refreshes the flavor text editor status.
-        /// </summary>
-        public void RefreshCharacterInfo()
+        private RecordEditorGui CreateRecordEditorTab()
         {
-            // if (ICInfoEditor.VisibleInTree)
-            // {
-            //     ICInfoEditor.Physical.Visible = _allowFlavorText;
-            //     ICInfoEditor.Personality.Visible = _allowFlavorText;
-            //     ICInfoEditor.Secrets.Visible = _allowCharacterSecrets;
-            //     ICInfoEditor.Exploitable.Visible = _allowCharacterSecrets;
-            // }
-            // if (OOCInfoEditor.VisibleInTree)
-            // {
-            //     OOCInfoEditor.OOCNotes.Visible = _allowRPNotes;
-            //     OOCInfoEditor.PersonalNotes.Visible = _allowRPNotes;
-            // }
-        }
+            // Create the record editor in code so that we can provide a callback for saving edits back to the profile.
+            var recordEditor = new RecordEditorGui(UpdateProfileRecords)
+            {
+                HorizontalExpand = true,
+                VerticalExpand = true
+            };
 
-        // 🌟Starlight🌟 end
+            TabContainer.AddChild(recordEditor);
+            TabContainer.SetTabTitle(TabContainer.ChildCount - 1, Loc.GetString("humanoid-profile-editor-cd-records-tab"));
+            recordEditor.Update(Profile);
+            return recordEditor;
+        }
+        // Cosmatic Drift Record System-end
 
          public void RefreshFlavorText()
         {
@@ -974,7 +903,6 @@ namespace Content.Client.Lobby.UI
             // UpdateCharacterInfoEditorText(); //Starlight
             UpdateSexControls();
             UpdateGenderControls();
-            //UpdateSizeControls(); //starlight
             UpdateSkinColor();
             UpdateSpawnPriorityControls();
             UpdateAgeEdit();
@@ -984,9 +912,10 @@ namespace Content.Client.Lobby.UI
             UpdateHairPickers();
             UpdateCMarkingsHair();
             UpdateCMarkingsFacialHair();
-            //UpdateVoicesControls();
-            //UpdateSiliconVoicesControls(); // 🌟Starlight🌟
-            //UpdateCybernetics(); // Starlight
+            // Begin CD - Character Records
+            UpdateHeightControls();
+            _recordsTab.Update(profile);
+            // End CD - Character Records
 
             RefreshAntags();
             RefreshJobs();
@@ -994,11 +923,6 @@ namespace Content.Client.Lobby.UI
             RefreshSpecies();
             RefreshTraits();
             RefreshFlavorText();
-            // Ensure the record editor reflects the freshly-loaded profile data.
-            // Cosmatic Drift Record System-start
-            //_recordsTab.Update(Profile); // Refresh record editor when a profile is loaded
-            // Cosmatic Drift Record System-end
-            // RefreshCharacterInfo(); //starlight
             Preview.Initialize(this, _entManager, _preferencesManager, _prototypeManager, _playerManager);
             ReloadPreview();
         }
@@ -1391,37 +1315,6 @@ namespace Content.Client.Lobby.UI
             ReloadPreview();
         }
 
-        //starlight start
-        // private void UpdateSizeText()
-        // {
-        //     if (Profile is null) return;
-        //     if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype))
-        //     {
-        //         var height = speciesPrototype.StandardSize * (Profile.Appearance.Height - 1f) * 2f + speciesPrototype.StandardSize;
-        //         var weight = speciesPrototype.StandardWeight + speciesPrototype.StandardDensity * (Profile.Appearance.Width * Profile.Appearance.Height * Profile.Appearance.Height - 1);
-        //         HeightDescribeLabel.Text = Loc.GetString("humanoid-profile-editor-height-label", ("height", Math.Round(height)));
-        //         WidthDescribeLabel.Text = Loc.GetString("humanoid-profile-editor-width-label", ("weight", Math.Round(weight, 1)));
-        //         _recordsTab?.UpdateComputedMetrics(Profile); // Chromatic Drift Records: Update the records tab with new computed metrics
-        //     }
-        // }
-
-        // private void SetWidth(float newWidth)
-        // {
-        //     if (Profile is null) return;
-        //     Profile.Appearance = Profile.Appearance.WithWidth(newWidth);
-        //     UpdateSizeText();
-        //     ReloadPreview();
-        // }
-
-        // private void SetHeight(float newHeight)
-        // {
-        //     if (Profile is null) return;
-        //     Profile.Appearance = Profile.Appearance.WithHeight(newHeight);
-        //     UpdateSizeText();
-        //     ReloadPreview();
-        // }
-        //starlight end
-
         private void SetSpecies(string newSpecies)
         {
             Profile = Profile?.WithSpecies(newSpecies);
@@ -1433,7 +1326,6 @@ namespace Content.Client.Lobby.UI
             RefreshLoadouts();
             UpdateSexControls(); // update sex for new species
             UpdateSpeciesGuidebookIcon();
-            //UpdateSizeControls(); //starlight
             ReloadPreview();
         }
 
@@ -1448,13 +1340,27 @@ namespace Content.Client.Lobby.UI
             ReloadPreview();
         }
 
-        // Starlight - Start
-        // private void SetCustomSpecieName(string customname)
-        // {
-        //     Profile = Profile?.WithCustomSpecieName(customname);
-        //     SetDirty();
-        // }
-        // Starlight - End
+        // Begin CD - Character Records
+        // Starlight and Moonflower modifications made
+        private void UpdateHeightText()
+        {
+            if (Profile is null) return;
+            if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype))
+            {
+                var profileHeight = speciesPrototype.StandardHeight * (Profile.Appearance.Height - 1f) * 2f + speciesPrototype.StandardHeight;
+                CDHeight.Text = Loc.GetString("humanoid-profile-editor-height-label", ("height", Math.Round(profileHeight)));
+                _recordsTab?.UpdateComputedMetrics(Profile); // Compute the changed records, save them to CD profile.
+            }
+        }
+        private void SetProfileHeight(float height)
+        {
+            if (Profile is null) return;
+            Profile.Appearance = Profile.Appearance.WithHeight(height);
+            UpdateHeightText();
+            SetDirty();
+            ReloadProfilePreview();
+        }
+        // End CD - Character Records
 
         private void SetSpawnPriority(SpawnPriorityPreference newSpawnPriority)
         {
@@ -1462,16 +1368,16 @@ namespace Content.Client.Lobby.UI
             SetDirty();
         }
         // Cosmatic Drift Record System-start: Persist in-editor record edits back into the profile model
-        // private void UpdateProfileRecords(PlayerProvidedCharacterRecords records)
-        // {
-        //     if (Profile is null)
-        //         return;
+        private void UpdateProfileRecords(PlayerProvidedCharacterRecords records)
+        {
+            if (Profile is null)
+                return;
 
-        //     // Persist the record edits on the working profile so they will be saved later.
-        //     // Store the freshly edited records back onto the profile blob.
-        //     Profile = Profile.WithCDCharacterRecords(records);
-        //     SetDirty();
-        // }
+            // Persist the record edits on the working profile so they will be saved later.
+            // Store the freshly edited records back onto the profile blob.
+            Profile = Profile.WithCDCharacterRecords(records);
+            SetDirty();
+        }
         // Cosmatic Drift Record System-end
 
         public bool IsDirty
@@ -1549,27 +1455,6 @@ namespace Content.Client.Lobby.UI
             else
                 SexButton.SelectId((int)sexes[0]);
         }
-
-        //starlight start
-        // private void UpdateSizeControls()
-        // {
-        //     if (Profile == null) return;
-
-        //     if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype))
-        //     {
-        //         WidthSlider.MinValue = speciesPrototype.MinWidth;
-        //         WidthSlider.MaxValue = speciesPrototype.MaxWidth;
-        //         WidthSlider.Value = Profile.Appearance.Width;
-
-        //         HeightSlider.MinValue = speciesPrototype.MinHeight;
-        //         HeightSlider.MaxValue = speciesPrototype.MaxHeight;
-        //         HeightSlider.Value = Profile.Appearance.Height;
-
-        //         UpdateSizeText();
-        //     }
-        // }
-        //starlight end
-
         private void UpdateSkinColor()
         {
             if (Profile == null)
@@ -1647,6 +1532,25 @@ namespace Content.Client.Lobby.UI
 
             PronounsButton.SelectId((int)Profile.Gender);
         }
+
+        // Begin CD - Character Records
+        // Starlight modifications to sync height bar with records.
+        private void UpdateHeightControls()
+        {
+            if (Profile == null)
+            {
+                return;
+            }
+            if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype))
+            {
+                CDHeightSlider.MinValue = speciesPrototype.MinHeight;
+                CDHeightSlider.MaxValue = speciesPrototype.MaxHeight;
+                CDHeightSlider.Value = Profile.Appearance.Height;
+
+                UpdateHeightText();
+            }
+        }
+        // End CD - Character Records
 
         private void UpdateSpawnPriorityControls()
         {
@@ -1791,6 +1695,7 @@ namespace Content.Client.Lobby.UI
             var name = HumanoidCharacterProfile.GetName(Profile.Species, Profile.Gender);
             SetName(name);
             UpdateNameEdit();
+            _recordsTab.Update(Profile); // Update CD record of name
         }
 
         private async void ImportProfile()

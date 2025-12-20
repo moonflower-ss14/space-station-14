@@ -67,6 +67,15 @@
                                     <Control HorizontalExpand="True"/>
                                     <LineEdit Name="AgeEdit" MinSize="40 0" HorizontalAlignment="Right" />
                                 </BoxContainer>
+                                 <!-- CD Height -->
+                                 <BoxContainer Margin="10" HorizontalExpand="True" Orientation="Vertical">
+                                    <BoxContainer HorizontalExpand="True">
+                                        <Label SetWidth="150" Name="CDHeight" Margin="5 0 10 0"/>
+                                        <Control HorizontalExpand="True" />
+                                        <Slider Name="CDHeightSlider" HorizontalAlignment="Right" SetWidth="300" MinValue="0.0" MaxValue="1.0"/>
+                                        <Button Name="CDHeightReset" Text="{Loc 'humanoid-profile-editor-reset-height-button'}" HorizontalAlignment="Right"/>
+                                    </BoxContainer>
+                                </BoxContainer>
                                 <!-- Sex -->
                                 <BoxContainer HorizontalExpand="True">
                                     <Label Text="{Loc 'humanoid-profile-editor-sex-label'}" />

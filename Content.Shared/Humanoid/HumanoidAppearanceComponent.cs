@@ -82,8 +82,7 @@ public sealed partial class HumanoidAppearanceComponent : Component
     public float Width = 1f; // starlight
     [DataField, AutoNetworkedField]
     public float Height = 1f; // starlight
-    [DataField, AutoNetworkedField]
-    public bool EyeGlowing = false; //starlight
+
 
     /// <summary>
     ///     Hair color of this humanoid. Used to avoid looping through all markings

@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -13,8 +14,9 @@ using Content.Shared.Administration.Logs;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Database;
 // Cosmatic Drift Record System-start
-//using Content.Shared._CD.Records;
-//using Content.Server._CD.Records;
+using Content.Shared._CD.Records;
+using Content.Server._CD.Records;
+using Content.Shared.FixedPoint;
 // Cosmatic Drift Record System-end
 using Content.Shared.GameTicking;
 using Content.Shared.Humanoid;
@@ -276,6 +278,19 @@ namespace Content.Server.Database
                 }
             }
 
+            // CD: get character records or create default records
+            var cdRecords = profile.CDProfile?.CharacterRecords != null
+                ? RecordsSerialization.Deserialize(profile.CDProfile.CharacterRecords, profile.CDProfile.CharacterRecordEntries)
+                : PlayerProvidedCharacterRecords.DefaultRecords();
+
+            var cdAllergies = profile.CDProfile?.CharacterAllergies != null
+                ? profile.CDProfile.CharacterAllergies
+                    .Select(allergy => (allergy.Allergen, FixedPoint2.FromCents(allergy.Intensity)))
+                    .ToDictionary()
+                : new();
+
+            // END CD
+
             var loadouts = new Dictionary<string, RoleLoadout>();
 
             foreach (var role in profile.Loadouts)
@@ -357,9 +372,9 @@ namespace Content.Server.Database
                     Color.FromHex(profile.EyeColor),
                     // profile.EyeGlowing, //starlight
                     Color.FromHex(profile.SkinColor),
-                    markings
-                    // profile.StarLightProfile?.Width ?? 1f, //starlight
-                    // profile.StarLightProfile?.Height ?? 1f //starlight
+                    markings,
+                    profile.StarLightProfile?.Width ?? 1f, //starlight
+                    profile.StarLightProfile?.Height ?? 1f //starlight
                 ),
                 spawnPriority,
                 jobs,
@@ -367,7 +382,10 @@ namespace Content.Server.Database
                 traits.ToHashSet(),
                 loadouts,
                 // profile.StarLightProfile?.CyberneticIds ?? [], // Starlight
-                profile.Enabled
+                profile.Enabled,
+                profile.CDProfile?.Height ?? 1.0f,
+                cdRecords,
+                cdAllergies
             );
             // Cosmatic Drift Record System: Rehydrate saved CD records into the mutable profile copy
             // if (profile.CDProfile?.CharacterRecords != null)

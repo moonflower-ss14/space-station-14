@@ -58,17 +58,17 @@ namespace Content.Server.Database
                 .IsUnique();
 
             // Cosmatic Drift Record System-start: Link CD profile tables into the EF model so they persist with preferences
-            // modelBuilder.Entity<CDModel.CDProfile>()
-            //     .HasOne(p => p.Profile)
-            //     .WithOne(p => p.CDProfile)
-            //     .HasForeignKey<CDModel.CDProfile>(p => p.ProfileId)
-            //     .IsRequired();
+            modelBuilder.Entity<CDModel.CDProfile>()
+                .HasOne(p => p.Profile)
+                .WithOne(p => p.CDProfile)
+                .HasForeignKey<CDModel.CDProfile>(p => p.ProfileId)
+                .IsRequired();
 
-            // modelBuilder.Entity<CDModel.CharacterRecordEntry>()
-            //     .HasOne(e => e.CDProfile)
-            //     .WithMany(e => e.CharacterRecordEntries)
-            //     .HasForeignKey(e => e.CDProfileId)
-            //     .IsRequired();
+            modelBuilder.Entity<CDModel.CharacterRecordEntry>()
+                .HasOne(e => e.CDProfile)
+                .WithMany(e => e.CharacterRecordEntries)
+                .HasForeignKey(e => e.CDProfileId)
+                .IsRequired();
             // Cosmatic Drift Record System-end
 
             // Starlight - Start
@@ -461,7 +461,7 @@ namespace Content.Server.Database
         public int PreferenceId { get; set; }
         public Preference Preference { get; set; } = null!;
         public StarLightModel.StarLightProfile? StarLightProfile { get; set; } // Starlight
-        //public CDModel.CDProfile? CDProfile { get; set; } // Cosmatic Drift Record System: optional persisted record data
+        public CDModel.CDProfile? CDProfile { get; set; } // Cosmatic Drift Record System: optional persisted record data
     }
 
     public class Job
