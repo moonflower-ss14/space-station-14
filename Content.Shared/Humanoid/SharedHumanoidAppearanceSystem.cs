@@ -464,7 +464,7 @@ public abstract class SharedHumanoidAppearanceSystem : EntitySystem
         }
 
         humanoid.Age = profile.Age;
-        humanoid.Height = profile.Height;
+        humanoid.Height = profile.Appearance.Height;
 
         Dirty(uid, humanoid);
     }
