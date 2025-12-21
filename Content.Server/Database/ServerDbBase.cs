@@ -64,11 +64,11 @@ namespace Content.Server.Database
                     .ThenInclude(l => l.Groups)
                     .ThenInclude(group => group.Loadouts)
                 // Cosmatic Drift Record System-start: Hydrate CD profiles and their denormalized entries so the client editor has data ready
-                // .Include(p => p.Profiles)
-                //     .ThenInclude(h => h.CDProfile)
+                .Include(p => p.Profiles)
+                    .ThenInclude(h => h.CDProfile)
                 //     // Entity Framework will populate CharacterRecordEntries for any existing CDProfile,
                 //     // so it's safe to suppress the nullable warning here.
-                //     .ThenInclude(cdProfile => cdProfile!.CharacterRecordEntries)
+                .ThenInclude(cdProfile => cdProfile!.CharacterRecordEntries)
                 // Cosmatic Drift Record System-end
                 .Include(p => p.JobPriorities)
                 .AsSplitQuery()
@@ -127,10 +127,10 @@ namespace Content.Server.Database
                     .ThenInclude(group => group.Loadouts)
                 .Include(p => p.CharacterInfo) // Starlight-edit
                 // Cosmatic Drift Record System-start: Pull forward existing CD profile state when editing a saved slot
-                // .Include(p => p.CDProfile)
+                .Include(p => p.CDProfile)
                 //     // Entity Framework will populate CharacterRecordEntries for any existing CDProfile,
                 //     // so it's safe to suppress the nullable warning here as well.
-                //     .ThenInclude(cdProfile => cdProfile!.CharacterRecordEntries)
+                .ThenInclude(cdProfile => cdProfile!.CharacterRecordEntries)
                 // Cosmatic Drift Record System-end
                 .AsSplitQuery()
                 .SingleOrDefault(h => h.Slot == slot);
@@ -388,15 +388,15 @@ namespace Content.Server.Database
                 cdAllergies
             );
             // Cosmatic Drift Record System: Rehydrate saved CD records into the mutable profile copy
-            // if (profile.CDProfile?.CharacterRecords != null)
-            // {
-            //     var records = RecordsSerialization.Deserialize(profile.CDProfile.CharacterRecords, profile.CDProfile.CharacterRecordEntries); // Load player-authored records from storage
-            //     humanoid = humanoid.WithCDCharacterRecords(records);
-            // }
-            // else
-            // {
-            //     humanoid = humanoid.WithCDCharacterRecords(PlayerProvidedCharacterRecords.DefaultRecords()); // Seed with empty records when nothing has been saved yet
-            // }
+            if (profile.CDProfile?.CharacterRecords != null)
+            {
+                var records = RecordsSerialization.Deserialize(profile.CDProfile.CharacterRecords, profile.CDProfile.CharacterRecordEntries); // Load player-authored records from storage
+                humanoid = humanoid.WithCDCharacterRecords(records);
+            }
+            else
+            {
+                humanoid = humanoid.WithCDCharacterRecords(PlayerProvidedCharacterRecords.DefaultRecords()); // Seed with empty records when nothing has been saved yet
+            }
 
             return humanoid;
             // Cosmatic Drift Record System-end
@@ -429,8 +429,8 @@ namespace Content.Server.Database
             // profile.StarLightProfile.CustomSpecieName = humanoid.CustomSpecieName; // Starlight
             // profile.StarLightProfile.CyberneticIds = humanoid.Cybernetics; // Starlight
             profile.Age = humanoid.Age;
-            // profile.StarLightProfile.Width = appearance.Width; //starlight
-            // profile.StarLightProfile.Height = appearance.Height; //starlight
+            profile.StarLightProfile.Width = appearance.Width; //starlight
+            profile.StarLightProfile.Height = appearance.Height; //starlight
             profile.Sex = humanoid.Sex.ToString();
             profile.Gender = humanoid.Gender.ToString();
             profile.HairName = appearance.HairStyleId;
@@ -465,11 +465,11 @@ namespace Content.Server.Database
                         .Select(t => new Trait { TraitName = t })
             );
             // Cosmatic Drift Record System-start: Persist CD record updates back onto the database profile
-            // profile.CDProfile ??= new CDModel.CDProfile(); // Ensure the EF entity exists before serializing records
-            // var storedRecords = humanoid.CDCharacterRecords ?? PlayerProvidedCharacterRecords.DefaultRecords();
-            // profile.CDProfile.CharacterRecords = JsonSerializer.SerializeToDocument(storedRecords); // Store player-authored data as JSON for SQLite/Postgres
-            // profile.CDProfile.CharacterRecordEntries.Clear(); // Keep denormalized entries in sync with the serialized blob
-            // profile.CDProfile.CharacterRecordEntries.AddRange(RecordsSerialization.GetEntries(storedRecords));
+            profile.CDProfile ??= new CDModel.CDProfile(); // Ensure the EF entity exists before serializing records
+            var storedRecords = humanoid.CDCharacterRecords ?? PlayerProvidedCharacterRecords.DefaultRecords();
+            profile.CDProfile.CharacterRecords = JsonSerializer.SerializeToDocument(storedRecords); // Store player-authored data as JSON for SQLite/Postgres
+            profile.CDProfile.CharacterRecordEntries.Clear(); // Keep denormalized entries in sync with the serialized blob
+            profile.CDProfile.CharacterRecordEntries.AddRange(RecordsSerialization.GetEntries(storedRecords));
             // Cosmatic Drift Record System-end
 
             profile.Loadouts.Clear();
