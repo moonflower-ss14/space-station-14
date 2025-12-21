@@ -1,0 +1,10 @@
+- type: marking
+  id: VulpTailWag
+  bodyPart: Tail
+  markingCategory: Tail
+  SpeciesRestriction: [Vulpkanin]
+  sprites:
+    - sprite: _Moonflower/Mobs/Customization/vulpkanin/tail_markings.rsi
+      state: vulp_wag
+    - sprite: _Moonflower/Mobs/Customization/vulpkanin/tail_markings.rsi
+      state: vulp_wag-fade

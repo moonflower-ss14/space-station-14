@@ -197,7 +197,9 @@ public sealed class StationSpawningSystem : SharedStationSpawningSystem
             return;
 
         _cardSystem.TryChangeFullName(cardId, characterName, card);
-        _cardSystem.TryChangeJobTitle(cardId, jobPrototype.LocalizedName, card);
+        // If the card has a jobtitle, why are we setting it to the job name?
+        if (card.JobTitle == null)
+            _cardSystem.TryChangeJobTitle(cardId, jobPrototype.LocalizedName, card);
 
         if (_prototypeManager.Resolve(jobPrototype.Icon, out var jobIcon))
             _cardSystem.TryChangeJobIcon(cardId, jobIcon, card);

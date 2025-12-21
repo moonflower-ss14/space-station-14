@@ -1,0 +1,7 @@
+- type: loadoutGroup
+  id: PassengerPDA
+  name: loadout-group-passenger-pda
+  loadouts:
+  - PassengerPDA
+  - OffDutyPDA
+  - AssistantPDA

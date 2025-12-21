@@ -1,0 +1,17 @@
+- type: entity
+  parent: PassengerPDA
+  id: OffDutyPDA
+  name: off-duty PDA
+  description: You've decided to spend your PTO at work. Why?
+  components:
+    - type: Pda
+      id: OffDutyIDCard
+
+- type: entity
+  parent: PassengerPDA
+  id: AssistantPDA
+  name: assistant PDA
+  description: The lowest rung on the crew. Basically an intern.
+  components:
+  - type: Pda
+    id: AssistantIDCard

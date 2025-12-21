@@ -6,6 +6,7 @@ using Content.Shared.Access.Systems;
 using Content.Shared.Roles;
 using Content.Shared.StatusIcon;
 using Robust.Shared.Prototypes;
+using Content.Shared.Access.Components;
 
 namespace Content.Server.Access.Systems;
 
@@ -79,7 +80,12 @@ public sealed class PresetIdCardSystem : EntitySystem
 
         _accessSystem.SetAccessToJob(uid, job, extended);
 
-        _cardSystem.TryChangeJobTitle(uid, job.LocalizedName);
+        // If the card has a job title, we don't need to set it to the job name.
+        var card = Comp<IdCardComponent>(uid);
+
+        if (card.JobTitle == null)
+            _cardSystem.TryChangeJobTitle(uid, job.LocalizedName);
+
         _cardSystem.TryChangeJobDepartment(uid, job);
 
         if (_prototypeManager.Resolve(job.Icon, out var jobIcon))

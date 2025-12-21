@@ -1,0 +1,15 @@
+- type: entity
+  parent: PassengerIDCard
+  id: OffDutyIDCard
+  name: off-duty ID card
+  components:
+    - type: IdCard
+      jobTitle: job-alt-title-offduty
+
+- type: entity
+  parent: PassengerIDCard
+  id: AssistantIDCard
+  name: assistant ID card
+  components:
+  - type: IdCard
+    jobTitle: job-alt-title-assistant

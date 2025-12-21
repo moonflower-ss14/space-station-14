@@ -12,7 +12,7 @@
 - type: startingGear
   id: PassengerGear
   equipment:
-    id: PassengerPDA
+    # id: PassengerPDA # Moonflower: Customizable PDAs
     ears: ClothingHeadsetGrey
   #storage:
     #back:
