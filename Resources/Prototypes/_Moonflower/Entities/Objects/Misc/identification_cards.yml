@@ -1,3 +1,5 @@
+# Alternate ID Cards
+# Passenger Alternates
 - type: entity
   parent: PassengerIDCard
   id: OffDutyIDCard
@@ -8,8 +10,26 @@
 
 - type: entity
   parent: PassengerIDCard
-  id: AssistantIDCard
-  name: assistant ID card
+  id: InternIDCard
+  name: intern ID card
   components:
   - type: IdCard
-    jobTitle: job-alt-title-assistant
+    jobTitle: job-alt-title-intern
+
+# Medical Intern alternates
+- type: entity
+  parent: MedicalInternIDCard
+  id: NurseIDCard
+  name: nurse ID card
+  components:
+  - type: IdCard
+    jobTitle: job-alt-title-nurse
+
+# Medical Doctor alternates
+- type: entity
+  parent: MedicalIDCard
+  id: NursePractitionerIDCard
+  name: nurse practitioner ID card
+  components:
+  - type: IdCard
+    jobTitle: job-alt-title-nurse-practitioner

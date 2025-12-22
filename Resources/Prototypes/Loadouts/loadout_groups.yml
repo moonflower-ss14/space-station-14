@@ -1444,6 +1444,7 @@
   name: loadout-group-medical-doctor-id
   loadouts:
   - MedicalDoctorPDA
+  - NursePractitionerPDA # Moonflower
   - SeniorPhysicianPDA
 
 - type: loadoutGroup

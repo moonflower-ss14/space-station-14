@@ -6,7 +6,8 @@ job-name-detective = Detective
 job-name-brigmedic = Brigmedic
 job-name-borg = Cyborg
 job-name-scientist = Scientist
-job-name-research-assistant = Research Assistant
+# Moonflower - We use intern instead of assistant.
+job-name-research-assistant = Research Intern
 job-name-rd = Research Director
 job-name-psychologist = Psychologist
 job-name-intern = Medical Intern
@@ -14,7 +15,8 @@ job-name-doctor = Medical Doctor
 job-name-paramedic = Paramedic
 job-name-cmo = Chief Medical Officer
 job-name-chemist = Chemist
-job-name-technical-assistant = Technical Assistant
+# Moonflower - We use intern instead of assistant.
+job-name-technical-assistant = Technical Intern
 job-name-engineer = Station Engineer
 job-name-atmostech = Atmospheric Technician
 job-name-hop = Head of Personnel
@@ -102,7 +104,8 @@ JobPassenger = Passenger
 JobPsychologist = Psychologist
 JobQuartermaster = Quartermaster
 JobReporter = Reporter
-JobResearchAssistant = Research Assistant
+# Moonflower - intern instead of assistant
+JobResearchAssistant = Research Intern
 JobResearchDirector = Research Director
 JobSalvageSpecialist = Salvage Specialist
 JobScientist = Scientist
@@ -111,6 +114,7 @@ JobSecurityOfficer = Security Officer
 JobServiceWorker = Service Worker
 JobStationAi = Station AI
 JobStationEngineer = Station Engineer
-JobTechnicalAssistant = Technical Assistant
+#Moonflower - intern instead of assistant
+JobTechnicalAssistant = Technical Intern
 JobVisitor = Visitor
 JobWarden = Warden

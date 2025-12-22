@@ -1,17 +1,37 @@
+# Alternate PDAs
+# Passenger alternates
 - type: entity
   parent: PassengerPDA
   id: OffDutyPDA
   name: off-duty PDA
-  description: You've decided to spend your PTO at work. Why?
+  description: Belongs to an off-duty crewmember spending their PTO at work.
   components:
     - type: Pda
       id: OffDutyIDCard
 
 - type: entity
   parent: PassengerPDA
-  id: AssistantPDA
-  name: assistant PDA
-  description: The lowest rung on the crew. Basically an intern.
+  id: InternPDA
+  name: intern PDA
+  description: A PDA belonging to an in-training crewmember.
   components:
   - type: Pda
-    id: AssistantIDCard
+    id: InternIDCard
+
+# Medical Intern alternates
+- type: entity
+  parent: MedicalInternPDA
+  id: NursePDA
+  name: nurse PDA
+  components:
+    - type: Pda
+      id: NurseIDCard
+
+# Doctor alternates
+- type: entity
+  parent: MedicalPDA
+  id: NursePractitionerPDA
+  name: nurse practitioner PDA
+  components:
+  - type: Pda
+    id: NursePractitionerIDCard

@@ -4,4 +4,11 @@
   loadouts:
   - PassengerPDA
   - OffDutyPDA
-  - AssistantPDA
+  - InternPDA
+
+- type: loadoutGroup
+  id: MedicalInternPDA
+  name: loadout-group-medical-intern-pda
+  loadouts:
+  - MedicalInternPDA
+  - NursePDA
