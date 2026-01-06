@@ -7,8 +7,8 @@ using Content.Shared.Whitelist;
 using Robust.Shared.Prototypes;
 using Content.Server._Moonflower.Language; // Starlight
 using Content.Shared.Tag;
-using System.Linq;
 using Content.Shared.Preferences; // Starlight
+using Content.Shared.StatusEffectNew; // Moonflower
 
 namespace Content.Server.Traits;
 
