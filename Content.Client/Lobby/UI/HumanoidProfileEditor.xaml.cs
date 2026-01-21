@@ -258,7 +258,7 @@ namespace Content.Client.Lobby.UI
             CDHeightReset.OnPressed += _ =>
             {
                 if (Profile is null) return;
-                if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype)) CDHeightSlider.Value = speciesPrototype.DefaultWidth;
+                if (_prototypeManager.TryIndex<SpeciesPrototype>(Profile.Species, out var speciesPrototype)) CDHeightSlider.Value = speciesPrototype.DefaultHeight;
             };
 
             CDHeightSlider.OnValueChanged += args =>

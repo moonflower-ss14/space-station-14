@@ -10,6 +10,7 @@ using Robust.Client.GameObjects;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
+using Content.Shared.Sprite;
 
 namespace Content.Client.Humanoid;
 
@@ -52,10 +53,13 @@ public sealed class HumanoidAppearanceSystem : SharedHumanoidAppearanceSystem
         var humanoidAppearance = entity.Comp1;
         var sprite = entity.Comp2;
 
+
         sprite[_sprite.LayerMapReserve((entity.Owner, sprite), HumanoidVisualLayers.Eyes)].Color = humanoidAppearance.EyeColor;
         // Starlight and CD start
         var speciesPrototype = _prototypeManager.Index<SpeciesPrototype>(humanoidAppearance.Species);
-        sprite.Scale = new Vector2(humanoidAppearance.Width * humanoidAppearance.Height, humanoidAppearance.Height);
+        var height = Math.Clamp(MathF.Round(entity.Comp1.Height, 2), speciesPrototype.MinHeight, speciesPrototype.MaxHeight);
+        var speciesScale = new Vector2(speciesPrototype.DefaultWidth, speciesPrototype.DefaultHeight);
+        entity.Comp2.Scale = speciesScale * new Vector2(speciesPrototype.ScaleHeight ? height : 1f, height);
         //starlight and CD end
     }
 

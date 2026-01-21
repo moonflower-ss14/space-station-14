@@ -238,7 +238,7 @@ public sealed partial class HumanoidCharacterAppearance : ICharacterAppearance, 
             // this isn't a clamp, it's a reset if either is out of range
             // maximum is done so that small species will get the correct height if they are defaulted (1f dwarf becoming 0.8f for example)
             // minimum is done so that null values (interpreted as 0f) will get the default height and not become miniatures
-            width = speciesProto.DefaultWidth;
+            // width = speciesProto.DefaultWidth;
             if (height > speciesProto.MaxHeight || height < speciesProto.MinHeight) height = speciesProto.DefaultHeight;
 
             markingSet.EnsureSpecies(species, skinColor, markingManager);
