@@ -9,6 +9,11 @@
   id: BaseMobSpecies
   abstract: true
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: Sprite
     layers:
     - map: [ "enum.HumanoidVisualLayers.Chest" ]

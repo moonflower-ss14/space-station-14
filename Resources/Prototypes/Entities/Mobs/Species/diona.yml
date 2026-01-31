@@ -5,6 +5,11 @@
   id: BaseMobDiona
   abstract: true
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: HumanoidAppearance
     species: Diona
   - type: Hunger

@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2024 Aidenkrz <aiden@djkraz.com>
+# SPDX-FileCopyrightText: 2024 DevilishMilk <bluscout78@yahoo.com>
+# SPDX-FileCopyrightText: 2024 Tadeo <td12233a@gmail.com>
+# SPDX-FileCopyrightText: 2025 SeaborneProto <163230048+SeaborneProto@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 corresp0nd <46357632+corresp0nd@users.noreply.github.com>
+# SPDX-FileCopyrightText: 2025 hivehum <ketchupfaced@gmail.com>
+# SPDX-FileCopyrightText: 2025 taydeo <td12233a@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later AND MIT
+
+- type: species
+  id: Felinid
+  name: species-name-felinid
+  roundStart: true
+  prototype: MobFelinid
+  sprites: MobHumanSprites
+  markingLimits: MobFelinidMarkingLimits
+  dollPrototype: MobFelinidDummy
+  skinColoration: HumanToned
+
+- type: markingPoints
+  id: MobFelinidMarkingLimits
+  points:
+    Hair:
+      points: 1
+      required: false
+    FacialHair:
+      points: 1
+      required: false
+    Tail:
+      points: 1
+      required: true
+      defaultMarkings: [ FelinidTailBasic ]
+    HeadTop:
+      points: 1
+      required: true
+      defaultMarkings: [ FelinidEarsBasic ]
+    Chest:
+      points: 4 # Frontier 1<4
+      required: false
+    Legs:
+      points: 8 # Frontier 2<8
+      required: false
+    Arms:
+      points: 8 # Frontier 2<8
+      required: false

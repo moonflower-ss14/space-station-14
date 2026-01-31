@@ -4,6 +4,11 @@
   id: BaseMobSlimePerson
   abstract: true
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: Hunger
   - type: Thirst
   - type: Icon

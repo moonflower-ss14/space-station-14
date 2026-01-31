@@ -35,6 +35,8 @@
     RLeg: MobHumanRLeg
     LFoot: MobHumanLFoot
     RFoot: MobHumanRFoot
+    Tail: MobHumanoidAnyMarking # Goobstation - Required for felinids & harpies.
+
 
 - type: markingPoints
   id: MobHumanMarkingLimits

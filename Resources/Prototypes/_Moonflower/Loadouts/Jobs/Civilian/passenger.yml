@@ -12,3 +12,8 @@
   id: AssistantPDA
   equipment:
     id: AssistantPDA
+
+- type: loadout
+  id: InternPDA
+  equipment:
+    id: InternPDA

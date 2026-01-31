@@ -5,6 +5,11 @@
   id: BaseMobReptilian
   abstract: true
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: HumanoidAppearance
     species: Reptilian
     hideLayersOnEquip:

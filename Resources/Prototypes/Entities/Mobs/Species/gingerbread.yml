@@ -5,6 +5,11 @@
   id: BaseMobGingerbread
   abstract: true
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: HumanoidAppearance
     species: Gingerbread
   - type: Icon

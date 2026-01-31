@@ -5,6 +5,11 @@
   id: BaseMobVulpkanin
   name: Urist McBark
   components:
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    understands:
+    - GalacticCommon
   - type: Hunger
   - type: Thirst
   - type: MessyDrinker
